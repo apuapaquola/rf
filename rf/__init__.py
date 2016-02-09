@@ -18,10 +18,10 @@
 """
 import argparse
 import os
-import subprocess
 import shutil
+import subprocess
 
-import rflib
+from rf import rflib
 
 __author__ = 'Apua Paquola'
 
