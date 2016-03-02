@@ -50,6 +50,12 @@ In the current implementation we use git for `__` and git-annex for `_`. For som
 Using git, users can collaborate and share analyses trees in a similar they can do with code.
 
 
+## Installation
+
+```
+pip install --user --egg git+git://github.com/apuapaquola/rf.git
+```
+
 ## Status
 
 This framework is in early stage of development, and contributors are very welcome.
