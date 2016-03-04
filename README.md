@@ -1,5 +1,12 @@
 ## rf - A framework for collaborative computational research
 
+```
+pip install git+git://github.com/apuapaquola/rf.git
+```
+
+
+## Overview
+
 We propose a simple and intuitive way to organize computational analyses using a directory structure constructed according to 3 simple principles.
 
 Consider the following directory structure:
@@ -20,9 +27,9 @@ In this tree, nodeA has two children: nodeB and nodeC.
 
 We can think of these nodes as steps in a computational pipeline, in which nodeB and nodeC depend on the results of computation performed in nodeA.
 
-This is principle 1: use of a directory struture to represent dependencies between analysis steps.
+This is principle 1: use of a directory structure to represent dependencies between analysis steps.
 
-Each node has two special subdirectories: `__` (double underscore) and `_` (single undescore) with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory `__`. For this reason, we call `__` the "human" directory. Similarly, we use directory `_` to store the results of computation of this analysis step. For this reason, we call `_` the "computer" directory.
+Each node has two special subdirectories: `__` (double underscore) and `_` (single underscore) with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory `__`. For this reason, we call `__` the "human" directory. Similarly, we use directory `_` to store the results of computation of this analysis step. For this reason, we call `_` the "computer" directory.
 
 This is principle 2: separation of user-generated data from program-generated data.
 
@@ -50,11 +57,6 @@ In the current implementation we use git for `__` and git-annex for `_`. For som
 Using git, users can collaborate and share analyses trees in a similar they can do with code.
 
 
-## Installation
-
-```
-pip install --user --egg git+git://github.com/apuapaquola/rf.git
-```
 
 ## Status
 
