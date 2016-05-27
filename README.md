@@ -4,7 +4,10 @@
 pip install git+git://github.com/apuapaquola/rf.git
 ```
 
+## Preprint 
 
+ http://biorxiv.org/content/early/2015/12/09/033654
+ 
 ## Overview
 
 We propose a simple and intuitive way to organize computational analyses using a directory structure constructed according to 3 simple principles.
@@ -35,7 +38,7 @@ This is principle 2: separation of user-generated data from program-generated da
 
 In the "human" directory we put a file named driver. driver is a script that is supposed to be run without arguments from the "computer" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_`.
 
-This is principle 3: use of driver scripts. [see ref]
+This is principle 3: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
 
 
 These 3 principles are desirable to help keep analysis organized, reproducible and easier to understand.
