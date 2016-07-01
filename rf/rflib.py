@@ -30,16 +30,16 @@ def is_ready_to_run(node):
     Args:
         node: a directory (node)
     Returns:
-        bool: True if the node is ready to run, i.e., if it has no _/ dir and if there is an executable driver script at __/
+        bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an executable driver script at _h/
     """
     return node is not None and \
-           os.path.isdir(node + '/__') and \
-           not os.path.exists(node + '/_') and \
-           os.access(node + '/__/driver', os.X_OK)
+           os.path.isdir(node + '/_h') and \
+           not os.path.exists(node + '/_m') and \
+           os.access(node + '/_h/driver', os.X_OK)
 
 
 def find_dependencies(node, recursive):
-    """Finds the human directories __/ in a subtree, and .
+    """Finds the human directories _h/ in a subtree, and dependencies.
 
     Args:
         node (str): a node at the root of the tree.
@@ -55,9 +55,9 @@ def find_dependencies(node, recursive):
         (parent, child) = queue.pop(0)
 
         l = list(dependency_links(child))
-        dependencies = [x for x in [parent] + l \
-                        if x is not None and \
-                        is_ready_to_run(os.path.realpath(x)) and \
+        dependencies = [x for x in [parent] + l
+                        if x is not None and
+                        is_ready_to_run(os.path.realpath(x)) and
                         belongs_to_tree(x, node)]
 
         if is_ready_to_run(os.path.realpath(child)) and \
@@ -65,11 +65,11 @@ def find_dependencies(node, recursive):
             yield (dependencies, child)
 
         if recursive:
-            queue.extend(((child, xx) for xx in filter(os.path.isdir, (os.path.join(child,x) for x in os.listdir(child) if x not in ['_','__']))))
+            queue.extend(((child, xx) for xx in filter(os.path.isdir, (os.path.join(child,x) for x in os.listdir(child) if x not in ['_h','_m']))))
 
 
 def nohup_out(node):
-    return node + '/_/nohup.out'
+    return node + '/_m/nohup.out'
 
 
 def rule_string(dependencies, node):
@@ -88,9 +88,9 @@ def rule_string(dependencies, node):
     return '''.ONESHELL:
 %s: %s
 \tdate
-\tmkdir %s/_
-\tcd %s/_
-\tnohup ../__/driver
+\tmkdir %s/_m
+\tcd %s/_m
+\tnohup ../_h/driver
 
 ''' % (nohup_out(node), dep_string, node, node)
 
@@ -106,7 +106,7 @@ def dependency_links(node):
 
     """
 
-    depdir = node+'/__/dep'
+    depdir = node+'/_h/dep'
     if os.path.isdir(depdir):
         for x in os.listdir(depdir):
             if os.path.islink(depdir+'/'+x) and os.path.isdir(depdir+'/'+x):
@@ -169,19 +169,10 @@ def run_make(makefile_string):
 
 
 def run(args):
-    run_make(makefile(find_dependencies(os.path.realpath(args.node), args.recursive)))
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive))
+    if args.verbose:
+        print(mf)
+    if not args.dry_run:
+        run_make(mf)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('node')
-    parser.add_argument('--dry-run', '-n', action='store_true', default=False)
-    parser.add_argument('--verbose', '-v', action='store_true', default=False)
-    parser.add_argument('--recursive', '-r', action='store_true', default=False)
-    args = parser.parse_args()
-
-    run(args)
-
-
-if __name__ == "__main__":
-    main()

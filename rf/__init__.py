@@ -21,7 +21,7 @@ import os
 import shutil
 import subprocess
 
-from rf import rflib
+from . import rflib
 
 __author__ = 'Apua Paquola'
 
@@ -37,7 +37,7 @@ def nodes(parent):
     assert os.path.isdir(parent)
     yield parent
     for x in os.listdir(parent):
-        if x not in ['_', '__', '.git']:
+        if x not in ['_h', '_m', '.git']:
             child = os.path.join(parent, x)
             if os.path.isdir(child):
                 yield from nodes(child)
@@ -52,18 +52,18 @@ def run(args):
 
 
 def drop(args):
-    """Deletes the contents of machine dirs _
+    """Deletes the contents of machine dirs _m
     """
     if args.recursive:
         nl = list(nodes(args.node))
     else:
         nl = [args.node]
 
-    dirs = [os.path.join(x, '_') for x in nl]
+    dirs = [os.path.join(x, '_m') for x in nl]
 
     for x in dirs:
-        assert x.endswith('_')
-        assert not x.endswith('__')
+        assert x.endswith('_m')
+        assert not x.endswith('_h')
 
         if not os.path.isdir(x):
             continue
@@ -96,8 +96,8 @@ def commit(args):
     else:
         nl = [args.node]
 
-    machine_dirs = [y for y in [os.path.join(x, '_') for x in nl] if os.path.isdir(y)]
-    human_dirs = [y for y in [os.path.join(x, '__') for x in nl] if os.path.isdir(y)]
+    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
+    human_dirs = [y for y in [os.path.join(x, '_h') for x in nl] if os.path.isdir(y)]
 
     try:
         subprocess.check_call(['git', 'add'] + human_dirs)
@@ -117,7 +117,7 @@ def get(args):
     else:
         nl = [args.node]
 
-    machine_dirs = [y for y in [os.path.join(x, '_') for x in nl] if os.path.isdir(y)]
+    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
 
     subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
     subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
