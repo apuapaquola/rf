@@ -20,6 +20,7 @@
 import argparse
 import os
 import subprocess
+import functools
 
 __author__ = 'Apua Paquola'
 
@@ -72,7 +73,7 @@ def nohup_out(node):
     return node + '/_m/nohup.out'
 
 
-def rule_string(dependencies, node):
+def rule_string_native(dependencies, node):
     """Generates a makefile rule for a node given its dependencies.
 
     Args:
@@ -90,9 +91,48 @@ def rule_string(dependencies, node):
 \tdate
 \tmkdir %s/_m
 \tcd %s/_m
-\tnohup ../_h/driver
+\t../_h/driver > nohup.out 2>&1
+\tdate
 
 ''' % (nohup_out(node), dep_string, node, node)
+
+
+def rule_string_docker(dependencies, node, docker_image):
+    """Generates a makefile rule for a node given its dependencies.
+
+    Args:
+        dependencies (list of str): list of nodes
+        node (str): the base directory of the node
+        docker_image (str): name of docker image to use
+
+    Returns:
+        str: a makefile rule specifying how to generate the machine directory
+            of the current node, given the its dependencies.
+    """
+    dep_string = ' '.join((nohup_out(x) for x in dependencies))
+
+    if node is not None and \
+        os.path.isdir(node + '/_h') and \
+        os.access(node + '/_h/docker_driver', os.X_OK):
+
+        docker_command = '../_h/docker_driver > nohup.out 2>&1'
+
+    else:
+        base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
+
+        docker_command = ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
+                          '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''')\
+                         % (base_node, base_node, node, node, docker_image, node)
+
+    return '''.ONESHELL:
+%s: %s
+\tdate
+\tmkdir %s/_m
+\tcd %s/_m
+\t%s
+\tdate
+
+''' % (nohup_out(node), dep_string, node, node, docker_command)
 
 
 def dependency_links(node):
@@ -126,7 +166,7 @@ def belongs_to_tree(dirname, basedir):
     return (os.path.realpath(dirname)+'/').startswith(os.path.realpath(basedir)+'/')
 
 
-def makefile(dependency_iter):
+def makefile(dependency_iter, rule_string_function):
     """Generates a makefile given a list of tuples specifying nodes and dependencies.
 
     Args:
@@ -140,7 +180,7 @@ def makefile(dependency_iter):
 
     makefile_string = ''
     for (dependencies, child) in dependency_iter:
-        makefile_string += rule_string(dependencies, child)
+        makefile_string += rule_string_function(dependencies, child)
 
         for p in dependencies:
             dependency_set.add(p)
@@ -148,7 +188,7 @@ def makefile(dependency_iter):
         child_set.add(child)
 
     for node in dependency_set.difference(child_set):
-        makefile_string += rule_string([], node)
+        makefile_string += rule_string_function([], node)
 
     makefile_string = 'all: ' + ' '.join(map(nohup_out, dependency_set.union(child_set))) + \
                '\n\n' + makefile_string
@@ -169,7 +209,12 @@ def run_make(makefile_string):
 
 
 def run(args):
-    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive))
+    """Implements rf run
+    arguments from command line"""
+    
+    rule_string_function = functools.partial(rule_string_docker, docker_image='u2')
+
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
     if args.verbose:
         print(mf)
     if not args.dry_run:
