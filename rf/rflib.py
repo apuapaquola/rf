@@ -211,8 +211,11 @@ def run_make(makefile_string):
 def run(args):
     """Implements rf run
     arguments from command line"""
-    
-    rule_string_function = functools.partial(rule_string_docker, docker_image='u2')
+
+    if args.docker_image is not None:
+        rule_string_function = functools.partial(rule_string_docker, docker_image=args.docker_image)
+    else:
+        rule_string_function = rule_string_native
 
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
     if args.verbose:
