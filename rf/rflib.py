@@ -189,7 +189,7 @@ def makefile(dependency_iter, rule_string_function):
         makefile_string += rule_string_function([], node)
 
     makefile_string = 'all: ' + ' '.join(map(success_file, dependency_set.union(child_set))) + \
-               '\n\n' + makefile_string
+        '\n\n' + makefile_string
 
     return makefile_string
 
@@ -204,8 +204,6 @@ def run_make(makefile_string):
     p.stdin.write(makefile_string.encode())
     p.stdin.close()
     p.wait()
-
-    #import time; time.sleep(60)
 
 
 def run(args):
