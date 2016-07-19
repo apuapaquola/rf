@@ -100,8 +100,8 @@ def driver_script_command_docker(node, docker_image):
                 (base_node, base_node, node, node, docker_image, node)
 
 
-def nohup_out(node):
-    return node + '/_m/nohup.out'
+def success_file(node):
+    return node + '/_m/SUCCESS'
 
 
 def rule_string(dependencies, node, driver_script_command_function):
@@ -116,19 +116,21 @@ def rule_string(dependencies, node, driver_script_command_function):
         str: a makefile rule specifying how to generate the machine directory
             of the current node, given the its dependencies.
     """
-    dep_string = ' '.join((nohup_out(x) for x in dependencies))
+    dep_string = ' '.join((success_file(x) for x in dependencies))
 
     command = driver_script_command_function(node)
 
     return '''.ONESHELL:
 %s: %s
+\tset -o errexit -o pipefail
 \techo -n "Start %s: "; date --rfc-3339=seconds
 \tmkdir %s/_m
 \tcd %s/_m
 \t%s
+\ttouch SUCCESS
 \techo -n "End %s: "; date --rfc-3339=seconds
 
-''' % (nohup_out(node), dep_string, node, node, node, command, node)
+''' % (success_file(node), dep_string, node, node, node, command, node)
 
 
 def dependency_links(node):
@@ -186,7 +188,7 @@ def makefile(dependency_iter, rule_string_function):
     for node in dependency_set.difference(child_set):
         makefile_string += rule_string_function([], node)
 
-    makefile_string = 'all: ' + ' '.join(map(nohup_out, dependency_set.union(child_set))) + \
+    makefile_string = 'all: ' + ' '.join(map(success_file, dependency_set.union(child_set))) + \
                '\n\n' + makefile_string
 
     return makefile_string
@@ -202,6 +204,8 @@ def run_make(makefile_string):
     p.stdin.write(makefile_string.encode())
     p.stdin.close()
     p.wait()
+
+    #import time; time.sleep(60)
 
 
 def run(args):
