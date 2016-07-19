@@ -73,6 +73,38 @@ def nohup_out(node):
     return node + '/_m/nohup.out'
 
 
+def driver_script_command_native():
+    return '../_h/driver > nohup.out 2>&1'
+
+
+def driver_script_command_docker(node, docker_image):
+    """
+    If the file node/_h/docker_driver exists, then a command called it is generated. Otherwise,
+    a standard docker run call is generated using docker_image.
+
+    Args:
+        node: a node of the tree
+        docker_image: name of docker image to use
+
+    Returns:
+        A driver script calling command
+
+    """
+    if node is not None and \
+        os.path.isdir(node + '/_h') and \
+            os.access(node + '/_h/docker_driver', os.X_OK):
+        return '../_h/docker_driver > nohup.out 2>&1'
+
+    else:
+        base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
+
+        return ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
+                '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''') % \
+                (base_node, base_node, node, node, docker_image, node)
+
+
+
+
 def rule_string_native(dependencies, node):
     """Generates a makefile rule for a node given its dependencies.
 
@@ -111,18 +143,7 @@ def rule_string_docker(dependencies, node, docker_image):
     """
     dep_string = ' '.join((nohup_out(x) for x in dependencies))
 
-    if node is not None and \
-        os.path.isdir(node + '/_h') and \
-        os.access(node + '/_h/docker_driver', os.X_OK):
-
-        docker_command = '../_h/docker_driver > nohup.out 2>&1'
-
-    else:
-        base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
-
-        docker_command = ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
-                          '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''')\
-                         % (base_node, base_node, node, node, docker_image, node)
+    command = driver_script_command_docker(node, docker_image)
 
     return '''.ONESHELL:
 %s: %s
@@ -132,7 +153,7 @@ def rule_string_docker(dependencies, node, docker_image):
 \t%s
 \tdate
 
-''' % (nohup_out(node), dep_string, node, node, docker_command)
+''' % (nohup_out(node), dep_string, node, node, command)
 
 
 def dependency_links(node):
