@@ -69,17 +69,13 @@ def find_dependencies(node, recursive):
             queue.extend(((child, xx) for xx in filter(os.path.isdir, (os.path.join(child,x) for x in os.listdir(child) if x not in ['_h','_m']))))
 
 
-def nohup_out(node):
-    return node + '/_m/nohup.out'
-
-
-def driver_script_command_native():
+def driver_script_command_native(node):
+    assert(os.path.isdir(node))
     return '../_h/driver > nohup.out 2>&1'
 
 
 def driver_script_command_docker(node, docker_image):
-    """
-    If the file node/_h/docker_driver exists, then a command called it is generated. Otherwise,
+    """If the file node/_h/docker_driver exists, then a command called it is generated. Otherwise,
     a standard docker run call is generated using docker_image.
 
     Args:
@@ -90,6 +86,7 @@ def driver_script_command_docker(node, docker_image):
         A driver script calling command
 
     """
+    assert(os.path.isdir(node))
     if node is not None and \
         os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/docker_driver', os.X_OK):
@@ -103,39 +100,17 @@ def driver_script_command_docker(node, docker_image):
                 (base_node, base_node, node, node, docker_image, node)
 
 
+def nohup_out(node):
+    return node + '/_m/nohup.out'
 
 
-def rule_string_native(dependencies, node):
+def rule_string(dependencies, node, driver_script_command_function):
     """Generates a makefile rule for a node given its dependencies.
 
     Args:
         dependencies (list of str): list of nodes
-        node (str): the base directory of the node
-
-    Returns:
-        str: a makefile rule specifying how to generate the machine directory
-            of the current node, given the its dependencies.
-    """
-
-    dep_string = ' '.join((nohup_out(x) for x in dependencies))
-    return '''.ONESHELL:
-%s: %s
-\tdate
-\tmkdir %s/_m
-\tcd %s/_m
-\t../_h/driver > nohup.out 2>&1
-\tdate
-
-''' % (nohup_out(node), dep_string, node, node)
-
-
-def rule_string_docker(dependencies, node, docker_image):
-    """Generates a makefile rule for a node given its dependencies.
-
-    Args:
-        dependencies (list of str): list of nodes
-        node (str): the base directory of the node
-        docker_image (str): name of docker image to use
+        node (str): a tree node
+        driver_script_command_function: function that generates a driver script call
 
     Returns:
         str: a makefile rule specifying how to generate the machine directory
@@ -143,7 +118,7 @@ def rule_string_docker(dependencies, node, docker_image):
     """
     dep_string = ' '.join((nohup_out(x) for x in dependencies))
 
-    command = driver_script_command_docker(node, docker_image)
+    command = driver_script_command_function(node)
 
     return '''.ONESHELL:
 %s: %s
@@ -234,11 +209,14 @@ def run(args):
     arguments from command line"""
 
     if args.docker_image is not None:
-        rule_string_function = functools.partial(rule_string_docker, docker_image=args.docker_image)
+        dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
     else:
-        rule_string_function = rule_string_native
+        dscf = driver_script_command_native
+
+    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
+
     if args.verbose:
         print(mf)
     if not args.dry_run:
