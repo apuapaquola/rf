@@ -122,13 +122,13 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     return '''.ONESHELL:
 %s: %s
-\tdate
+\techo -n "Start %s: "; date --rfc-3339=seconds
 \tmkdir %s/_m
 \tcd %s/_m
 \t%s
-\tdate
+\techo -n "End %s: "; date --rfc-3339=seconds
 
-''' % (nohup_out(node), dep_string, node, node, command)
+''' % (nohup_out(node), dep_string, node, node, node, command, node)
 
 
 def dependency_links(node):
@@ -197,7 +197,7 @@ def run_make(makefile_string):
     :param makefile_string:
     :return:
     """
-    p = subprocess.Popen(['make', '-f', '-'], stdin=subprocess.PIPE)
+    p = subprocess.Popen(['make', '--keep-going', '--silent', '-f', '-'], stdin=subprocess.PIPE)
 
     p.stdin.write(makefile_string.encode())
     p.stdin.close()
