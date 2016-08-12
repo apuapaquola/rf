@@ -1,0 +1,20 @@
+[header_vars]
+
+LICENCE = ''
+AUTHOR = ''
+PREFIX = ''
+
+[rf_structure]
+
+PROJ_STRUCTURE = mode=compact
+                 transcriptome
+                 |alignment
+                 ||count_reads
+                 |||DE_method1
+                 ||||DE_reports
+                 |||DE_method2
+                 ||||DE_reports
+                 ||ann_splicing
+                 |seq_quality
+                 ||resume
+                    
