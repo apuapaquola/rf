@@ -275,11 +275,11 @@ def rule_string(dependencies, node, driver_script_command_function):
     RULE_STRING_TEMPLATE = '''.ONESHELL:\n''' + \
                            '''{success_file}: {dep_string}\n''' + \
                            '''\techo -n "Start {node}: "; date --rfc-3339=seconds\n''' + \
-                           '''\tmkdir  {node}/_m\n''' + \
-                           '''\tcd  {node}/_m\n''' + \
+                           '''\tmkdir {node}/_m\n''' + \
+                           '''\tcd {node}/_m\n''' + \
                            '''\t{command}\n''' + \
                            '''\ttouch SUCCESS\n''' + \
-                           '''\techo -n "End {node}: "; date --rfc-3339=seconds'''
+                           '''\techo -n "End {node}: "; date --rfc-3339=seconds\n'''
 
     data = {'success_file': success_file(node), 'dep_string': dep_string,
             'node': node, 'command': command}

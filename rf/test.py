@@ -60,7 +60,7 @@ class UnitTests(unittest.TestCase):
 
                 self.write_dummy_tree_and_init_git()
 
-                rflib.run(Namespace(node='.', recursive=True, verbose=True, dry_run=False, docker_image=docker_image))
+                rflib.run('.', recursive=True, verbose=True, dry_run=False, docker_image=docker_image)
 
                 command = '''export LC_ALL=C; find . -name '*.txt' | sort | md5sum'''
                 o = subprocess.check_output(command, shell=True).decode()
