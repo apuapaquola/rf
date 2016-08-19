@@ -51,7 +51,9 @@
 ###### GIT ANNEX ON SERVER
 
 Sources:
+
 https://git-scm.com/book/it/v2/Git-on-the-Server-Setting-Up-the-Server
+
 https://git-annex.branchable.com/tips/centralized_git_repository_tutorial/on_your_own_server/
 
 ###########################
