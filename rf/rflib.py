@@ -17,10 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import argparse
 import os
 import subprocess
 import functools
+import shutil
 
 __author__ = 'Apua Paquola'
 
@@ -31,7 +31,8 @@ def is_ready_to_run(node):
     Args:
         node: a directory (node)
     Returns:
-        bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an executable driver script at _h/
+        bool: True if the node is ready to run, i.e., if it has no _m/ dir
+        and if there is an executable driver script at _h/
     """
     return node is not None and \
            os.path.isdir(node + '/_h') and \
@@ -39,7 +40,7 @@ def is_ready_to_run(node):
            os.access(node + '/_h/driver', os.X_OK)
 
 
-def find_dependencies(node, recursive):
+def find_dependencies(node, recursive=False):
     """Finds the human directories _h/ in a subtree, and dependencies.
 
     Args:
@@ -47,7 +48,8 @@ def find_dependencies(node, recursive):
         recursive (bool): whether to look at the entire tree recursively.
 
     Yields:
-        (list, str): a tuple that contains a list of dependencies and a node, for each node of the tree that is ready to run.
+        (list, str): a tuple that contains a list of dependencies and a node,
+        for each node of the tree that is ready to run.
 
     """
     assert os.path.isdir(node)
@@ -66,7 +68,9 @@ def find_dependencies(node, recursive):
             yield (dependencies, child)
 
         if recursive:
-            queue.extend(((child, xx) for xx in filter(os.path.isdir, (os.path.join(child,x) for x in os.listdir(child) if x not in ['_h','_m']))))
+            queue.extend(((child, xx) for xx in filter(os.path.isdir, \
+                         (os.path.join(child, x) for x in os.listdir(child) \
+                          if x not in ['_h', '_m']))))
 
 
 def driver_script_command_native(node):
@@ -95,7 +99,8 @@ def driver_script_command_docker(node, docker_image):
     else:
         base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
 
-        DOCKER_DRIVER_TEMPLATE = '''docker run -v '{base_node}':'{base_node}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' + \
+        DOCKER_DRIVER_TEMPLATE = '''docker run -v '{base_node}':'{base_node}':ro ''' + \
+                                 ''' -v '{node}/_m':'{node}/_m' '{docker_image}' ''' + \
                                  '''bash -c 'cd "{node}/_m" && ../_h/driver > nohup.out 2>&1' '''
 
         data = {'base_node': base_node, 'node': node, 'docker_image': docker_image}
@@ -105,6 +110,106 @@ def driver_script_command_docker(node, docker_image):
 
 def success_file(node):
     return node + '/_m/SUCCESS'
+
+
+def nodes(parent):
+    """Finds the nodes under a directory tree.
+    Args:
+    parent: a node at the root of the tree.
+
+    Yields:
+    str: each node of the tree
+    """
+    assert os.path.isdir(parent)
+    yield parent
+    for x in os.listdir(parent):
+        if x not in ['_h', '_m', '.git']:
+            child = os.path.join(parent, x)
+            if os.path.isdir(child):
+                # yield from nodes(child)
+                # for support python 2,7
+                for node in nodes(child):
+                    yield node
+
+
+def clone(repository, directory):
+    """Clones a tree
+    """
+    subprocess.check_call(['git', 'clone', repository, directory])
+    init_repo(directory)
+
+
+def init_repo(node, annex=True, commit=True):
+    ''' init annex on node'''
+    os.chdir(node)
+    subprocess.check_call(['git', 'annex', 'init'])
+    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
+
+    if commit:
+        commit(node, recursive=False, message='Started the repo, commited using rf')
+
+
+def drop(node, recursive=False, force=False):
+    """Deletes the contents of machine dirs _m
+    """
+    if recursive:
+        nl = list(nodes(node))
+    else:
+        nl = [node]
+
+    dirs = [os.path.join(x, '_m') for x in nl]
+
+    for x in dirs:
+        assert x.endswith('_m')
+        assert not x.endswith('_h')
+
+        if not os.path.isdir(x):
+            continue
+
+        command = ['git', 'rm', '-r'] + [x]
+
+        try:
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError:
+            pass
+
+        if force and os.path.isdir(x):
+            shutil.rmtree(x)
+
+
+def get(node, recursive=False):
+    """Fetches real machine data from origin repository
+    :param args:
+    :return:
+    """
+    if recursive:
+        nl = list(nodes(node))
+    else:
+        nl = [node]
+
+    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
+
+    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
+    subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
+
+
+def commit(node, recursive=False, message='commited using rf'):
+    """Commits human and machine dirs to git and git-annex
+    """
+    if recursive:
+        nl = list(nodes(node))
+    else:
+        nl = [node]
+
+    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
+    human_dirs = [y for y in [os.path.join(x, '_h') for x in nl] if os.path.isdir(y)]
+
+    try:
+        subprocess.check_call(['git', 'add'] + human_dirs)
+        subprocess.check_call(['git', 'annex', 'add'] + machine_dirs)
+        subprocess.check_call(['git', 'commit', '-m', message] + human_dirs + machine_dirs)
+    except subprocess.CalledProcessError:
+        raise
 
 
 def rule_string(dependencies, node, driver_script_command_function):
@@ -211,20 +316,19 @@ def run_make(makefile_string):
     p.wait()
 
 
-def run(args):
-    """Implements rf run
-    arguments from command line"""
+def run(node, recursive=False, verbose=True, dry_run=False, docker_image=None):
+    """Implements rf run"""
 
-    if args.docker_image is not None:
-        dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
+    if docker_image is not None:
+        dscf = functools.partial(driver_script_command_docker, docker_image=docker_image)
     else:
         dscf = driver_script_command_native
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
-    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
+    mf = makefile(find_dependencies(os.path.realpath(node), recursive), rule_string_function)
 
-    if args.verbose:
+    if verbose:
         print(mf)
-    if not args.dry_run:
+    if not dry_run:
         run_make(mf)

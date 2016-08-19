@@ -17,30 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
-import os
-import shutil
-import subprocess
-
 from . import rflib
 
 __author__ = 'Apua Paquola'
-
-
-def nodes(parent):
-    """Finds the nodes under a directory tree.
-    Args:
-    parent: a node at the root of the tree.
-
-    Yields:
-    str: each node of the tree
-    """
-    assert os.path.isdir(parent)
-    yield parent
-    for x in os.listdir(parent):
-        if x not in ['_h', '_m', '.git']:
-            child = os.path.join(parent, x)
-            if os.path.isdir(child):
-                yield from nodes(child)
 
 
 def run(args):
@@ -48,63 +27,27 @@ def run(args):
     :param args:
     :return:
     """
-    rflib.run(args)
+    rflib.run(node=args.node, recursive=args.recursive,
+              verbose=args.verbose, dry_run=args.dry_run,
+              docker_image=args.docker_image)
 
 
 def drop(args):
     """Deletes the contents of machine dirs _m
     """
-    if args.recursive:
-        nl = list(nodes(args.node))
-    else:
-        nl = [args.node]
-
-    dirs = [os.path.join(x, '_m') for x in nl]
-
-    for x in dirs:
-        assert x.endswith('_m')
-        assert not x.endswith('_h')
-
-        if not os.path.isdir(x):
-            continue
-
-        command = ['git', 'rm', '-r'] + [x]
-
-        try:
-            subprocess.check_call(command)
-        except subprocess.CalledProcessError:
-            pass
-
-        if args.force and os.path.isdir(x):
-            shutil.rmtree(x)
+    rflib.drop(node=args.node, recursive=args.recursive, force=args.force)
 
 
 def clone(args):
     """Clones a tree
     """
-    subprocess.check_call(['git', 'clone', args.repository, args.directory])
-    os.chdir(args.directory)
-    subprocess.check_call(['git', 'annex', 'init'])
-    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
+    rflib.clone(repository=args.repository, directory=args.directory)
 
 
 def commit(args):
     """Commits human and machine dirs to git and git-annex
     """
-    if args.recursive:
-        nl = list(nodes(args.node))
-    else:
-        nl = [args.node]
-
-    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
-    human_dirs = [y for y in [os.path.join(x, '_h') for x in nl] if os.path.isdir(y)]
-
-    try:
-        subprocess.check_call(['git', 'add'] + human_dirs)
-        subprocess.check_call(['git', 'annex', 'add'] + machine_dirs)
-        subprocess.check_call(['git', 'commit', '-m', args.message] + human_dirs + machine_dirs)
-    except subprocess.CalledProcessError:
-        raise
+    rflib.commit(node=args.node, recursive=args.recursive, message=args.message)
 
 
 def get(args):
@@ -112,15 +55,7 @@ def get(args):
     :param args:
     :return:
     """
-    if args.recursive:
-        nl = list(nodes(args.node))
-    else:
-        nl = [args.node]
-
-    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
-
-    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
-    subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
+    rflib.get(node=args.node, recursive=args.recursive)
 
 
 def main():
