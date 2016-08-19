@@ -13,5 +13,38 @@ pip install git+git://github.com/apuapaquola/rf.git
 
 #### Or download and install manually
 python rf/setup.py install
-# Or with pip
+
+#### Or locally with pip
 pip install --install-option="--prefix=$PREFIX_PATH" rf
+
+## IMPORTANT
+
+RF has some problems with older versions of Make
+If you have a older version, please upgrade
+
+To check make version:
+
+```
+make --version
+```
+
+To upgrade:
+
+```
+cd /tmp
+wget http://ftp.gnu.org/gnu/make/make-4.2.tar.gz
+tar xvf make-4.2.tar.gz
+cd make-4.2
+./configure
+make
+sudo make install
+rm -rI make-4.2.tar.gz make-4.2
+```
+
+You can just download and execute your update_make.sh
+
+```
+bash <(curl -s https://github.com/apuapaquola/rf/blob/master/scripts/update_make.sh)
+```
+
+#
