@@ -44,7 +44,7 @@ rm -rI make-4.2.tar.gz make-4.2
 You can just download and execute your update_make.sh
 
 ```
-bash <(curl -s https://github.com/apuapaquola/rf/blob/master/scripts/update_make.sh)
+bash <(curl -s https://raw.githubusercontent.com/apuapaquola/rf/master/scripts/update_make.sh)
 ```
 
 #
