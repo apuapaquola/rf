@@ -95,9 +95,12 @@ def driver_script_command_docker(node, docker_image):
     else:
         base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
 
-        return ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
-                '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''') % \
-                (base_node, base_node, node, node, docker_image, node)
+        DOCKER_DRIVER_TEMPLATE = '''docker run -v '{base_node}':'{base_node}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' + \
+                                 '''bash -c 'cd "{node}/_m" && ../_h/driver > nohup.out 2>&1' '''
+
+        data = {'base_node': base_node, 'node': node, 'docker_image': docker_image}
+
+        return DOCKER_DRIVER_TEMPLATE.format(**data)
 
 
 def success_file(node):
@@ -120,17 +123,19 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     command = driver_script_command_function(node)
 
-    return '''.ONESHELL:
-%s: %s
-\tset -o errexit -o pipefail
-\techo -n "Start %s: "; date --rfc-3339=seconds
-\tmkdir %s/_m
-\tcd %s/_m
-\t%s
-\ttouch SUCCESS
-\techo -n "End %s: "; date --rfc-3339=seconds
+    RULE_STRING_TEMPLATE = '''.ONESHELL:\n''' + \
+                           '''{success_file}: {dep_string}\n''' + \
+                           '''\tset -o errexit -o pipefail\n''' + \
+                           '''\techo -n "Start {node}: "; date --rfc-3339=seconds\n''' + \
+                           '''\tmkdir  {node}/_m\n''' + \
+                           '''\tcd  {node}/_m\n''' + \
+                           '''\t{command}\n''' + \
+                           '''\ttouch SUCCESS\n''' + \
+                           '''\techo -n "End {node}: "; date --rfc-3339=seconds'''
 
-''' % (success_file(node), dep_string, node, node, node, command, node)
+    data = {'success_file': success_file(node), 'dep_string': dep_string,
+            'node': node, 'command': command}
+    return RULE_STRING_TEMPLATE.format(**data)
 
 
 def dependency_links(node):
@@ -223,5 +228,3 @@ def run(args):
         print(mf)
     if not args.dry_run:
         run_make(mf)
-
-
