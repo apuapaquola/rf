@@ -271,9 +271,9 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     command = driver_script_command_function(node)
 
-    # '''\tset -o errexit -o pipefail\n'''
     RULE_STRING_TEMPLATE = '''.ONESHELL:\n''' + \
                            '''{success_file}: {dep_string}\n''' + \
+                           '''\tset -o errexit -o pipefail\n''' + \
                            '''\techo -n "Start {node}: "; date --rfc-3339=seconds\n''' + \
                            '''\tmkdir {node}/_m\n''' + \
                            '''\tcd {node}/_m\n''' + \
@@ -329,7 +329,9 @@ def makefile(dependency_iter, rule_string_function):
     dependency_set = set()
     child_set = set()
 
-    makefile_string = ''
+    # set -o errexit -o pipefail
+    # works for bash, setting SHELL=/bin/bash in makefile
+    makefile_string = 'SHELL=/bin/bash\n\n'
     for (dependencies, child) in dependency_iter:
         makefile_string += rule_string_function(dependencies, child)
 
