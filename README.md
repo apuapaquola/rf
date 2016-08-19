@@ -96,6 +96,7 @@ Current work includes, and some of these will be available soon:
 - [ ] More tutorials.
 - [ ] More and better documentation.
 - [ ] Improvement of the manuscript
+- [ ] Support old versions of make
 
 ## Contributing
 
