@@ -149,6 +149,49 @@ def init_repo(node, annex=True, commit=True):
         commit(node, recursive=False, message='Started the repo, commited using rf')
 
 
+def create_node(node, custom_templates=None, create_deps_folder=True, commit=True):
+    '''
+    Create rf folders and empty drivers
+    '''
+
+    # Create Folders
+    if not os.path.exists(node):
+        os.makedirs(node)
+    if not os.path.exists(node + '/_h'):
+        os.makedirs(node + '/_h')
+    if create_deps_folder and not os.path.exists(node + '/_h/dep'):
+        os.makedirs(node + '/_h/dep')
+
+    # 0o777 or stat.S_IXUSR see https://docs.python.org/2/library/stat.html
+    DRIVER_PERMISSIONS = [0o754]
+
+    TEMPLATES = {'DRIVER': '''# Created with RF\n''' + \
+                           '''echo 'running driver at {node}';\n''' + \
+                           '''date > driver_output;\n''',
+                 'README': '''# Created with RF\n''' + \
+                           '''## rf - A framework for collaborative computational research\n''' + \
+                           '''## About: https://github.com/apuapaquola/rf\n''' + \
+                           '''## To install: pip install git+git://github.com/apuapaquola/rf.git\n''' + \
+                           '''## To run: \n'''
+                 }
+
+    if custom_templates:
+        TEMPLATES = custom_templates
+
+    if not os.path.isfile(node + '/_h/driver'):
+        data = {'node': node[2:],
+                'parent_node': os.path.abspath(node)}
+        with open(node + '/_h/README.md', 'w') as readme:
+            readme.write(TEMPLATES['README'].format(**data))
+        with open(node + '/_h/driver', 'w') as driver:
+            driver.write(TEMPLATES['DRIVER'].format(**data))
+        for perm in DRIVER_PERMISSIONS:
+            os.chmod(node + '/_h/driver', perm)
+
+    if commit:
+        commit(node, recursive=False, message='Started the node %s, commited using rf' % node)
+
+
 def drop(node, recursive=False, force=False):
     """Deletes the contents of machine dirs _m
     """
@@ -228,9 +271,9 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     command = driver_script_command_function(node)
 
+    # '''\tset -o errexit -o pipefail\n'''
     RULE_STRING_TEMPLATE = '''.ONESHELL:\n''' + \
                            '''{success_file}: {dep_string}\n''' + \
-                           '''\tset -o errexit -o pipefail\n''' + \
                            '''\techo -n "Start {node}: "; date --rfc-3339=seconds\n''' + \
                            '''\tmkdir  {node}/_m\n''' + \
                            '''\tcd  {node}/_m\n''' + \

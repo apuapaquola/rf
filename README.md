@@ -75,7 +75,6 @@ Separation of computer-generated data from human-generated data is also nice. It
 Running driver scripts without arguments is a way to make sure computation doesn't depend on manually specified parameters, which are easy to forget.
 
 
-
 ## Version control
 
 The separation of computer-generated data from human-generated data makes it easy to use version control systems for an analysis tree.
@@ -85,7 +84,6 @@ In the current implementation we use git for `_h` and git-annex for `_m`. For so
 Using git, users can collaborate and share analyses trees in a similar they can do with code.
 
 
-
 ## Status
 
 This framework is in early stage of development, and contributors are very welcome.
@@ -93,12 +91,11 @@ This framework is in early stage of development, and contributors are very welco
 
 Current work includes, and some of these will be available soon:
 
-* Docker support.
-* More and better documentation.
-* Concrete examples of analysis, mostly focusing on Bioinformatics.
-* Use cases.
-* Improvement of the manuscript.
-* Support for git lfs.
+- [ ] Support for git lfs.
+- [ ] More examples (Concrete examples of analysis, mostly focusing on Bioinformatics).
+- [ ] More tutorials.
+- [ ] More and better documentation.
+- [ ] Improvement of the manuscript
 
 ## Contributing
 

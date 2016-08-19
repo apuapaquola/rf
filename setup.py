@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='rf',
-    version='0.1.0.dev0',
-    description='A framework for collaborative computational research',
+    version='0.1.1.dev0',
+    description='A framework for collaborative data analysis',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apua Paquola',
     author_email='apuapaquola@gmail.com',
@@ -16,7 +16,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
     ],
-    keywords='bioinformatics reproducibility collaboration workflpw git',
+    keywords='bioinformatics reproducibility collaboration workflow git',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     entry_points={
         'console_scripts': [

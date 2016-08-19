@@ -1,4 +1,6 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><style>body {
+<!DOCTYPE html>
+<!-- saved from url=(0020)file:///tmp/114.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {
   width: 45em;
   border: 1px solid #ddd;
   outline: 1300px solid #fff;
@@ -1014,13 +1016,37 @@ body .markdown-body
     page-break-after: avoid;
   }
 }
-</style><title>README</title></head><body><article class="markdown-body"><h2 id="rf-a-framework-for-collaborative-computational-research"><a name="user-content-rf-a-framework-for-collaborative-computational-research" href="#rf-a-framework-for-collaborative-computational-research" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>rf - A framework for collaborative computational research</h2>
+</style><title>README</title></head><body><article class="markdown-body"><h6 id="_1"><a name="user-content-_1" href="file:///tmp/114.html#_1" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a></h6>
+<h6 id="_2"><a name="user-content-_2" href="file:///tmp/114.html#_2" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a></h6>
+<pre><code> ____  _____       _       __                                             _     
+|  _ \|  ___|     / \     / _|_ __ __ _ _ __ ___   _____      _____  _ __| | __ 
+| |_) | |_ (_)   / _ \   | |_| '__/ _` | '_ ` _ \ / _ \ \ /\ / / _ \| '__| |/ / 
+|  _ &lt;|  _| _   / ___ \  |  _| | | (_| | | | | | |  __/\ V  V / (_) | |  |   &lt;  
+|_| \_\_|  (_) /_/   \_\ |_| |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\ 
+
+  __                        _ _       _                     _   _            
+ / _| ___  _ __    ___ ___ | | | __ _| |__   ___  _ __ __ _| |_(_)_   _____  
+| |_ / _ \| '__|  / __/ _ \| | |/ _` | '_ \ / _ \| '__/ _` | __| \ \ / / _ \ 
+|  _| (_) | |    | (_| (_) | | | (_| | |_) | (_) | | | (_| | |_| |\ V /  __/ 
+|_|  \___/|_|     \___\___/|_|_|\__,_|_.__/ \___/|_|  \__,_|\__|_| \_/ \___| 
+
+     _       _                            _           _     
+  __| | __ _| |_ __ _    __ _ _ __   __ _| |_   _ ___(_)___ 
+ / _` |/ _` | __/ _` |  / _` | '_ \ / _` | | | | / __| / __|
+| (_| | (_| | || (_| | | (_| | | | | (_| | | |_| \__ \ \__ \
+ \__,_|\__,_|\__\__,_|  \__,_|_| |_|\__,_|_|\__, |___/_|___/
+                                            |___/           
+</code></pre>
+
+<h6 id="_3"><a name="user-content-_3" href="file:///tmp/114.html#_3" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a></h6>
+<h6 id="_4"><a name="user-content-_4" href="file:///tmp/114.html#_4" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a></h6>
+<h2 id="rf-a-framework-for-collaborative-data-analysis"><a name="user-content-rf-a-framework-for-collaborative-data-analysis" href="file:///tmp/114.html#rf-a-framework-for-collaborative-data-analysis" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>RF - A framework for collaborative data analysis</h2>
 <pre><code>pip install git+git://github.com/apuapaquola/rf.git
 </code></pre>
 
-<h2 id="preprint"><a name="user-content-preprint" href="#preprint" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Preprint</h2>
+<h2 id="preprint"><a name="user-content-preprint" href="file:///tmp/114.html#preprint" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Preprint</h2>
 <p><a href="http://biorxiv.org/content/early/2015/12/09/033654">http://biorxiv.org/content/early/2015/12/09/033654</a></p>
-<h2 id="overview"><a name="user-content-overview" href="#overview" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Overview</h2>
+<h2 id="overview"><a name="user-content-overview" href="file:///tmp/114.html#overview" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Overview</h2>
 <p>We propose a simple and intuitive way to organize computational analyses using a directory structure constructed according to 3 simple principles.</p>
 <p>Consider the following directory structure:</p>
 <pre><code>.
@@ -1037,28 +1063,29 @@ body .markdown-body
 <p>In this tree, nodeA has two children: nodeB and nodeC.</p>
 <p>We can think of these nodes as steps in a computational pipeline, in which nodeB and nodeC depend on the results of computation performed in nodeA.</p>
 <p>This is principle 1: use of a directory structure to represent dependencies between analysis steps.</p>
-<p>Each node has two special subdirectories: <code>_h</code> and <code>_m</code> with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory <code>_h</code>. For this reason, we call <code>_h</code> the &ldquo;human&rdquo; directory. Similarly, we use directory <code>_m</code> to store the results of computation of this analysis step. For this reason, we call <code>_m</code> the &ldquo;machine&rdquo; directory.</p>
+<p>Each node has two special subdirectories: <code>_h</code> and <code>_m</code> with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory <code>_h</code>. For this reason, we call <code>_h</code> the “human” directory. Similarly, we use directory <code>_m</code> to store the results of computation of this analysis step. For this reason, we call <code>_m</code> the “machine” directory.</p>
 <p>This is principle 2: separation of user-generated data from program-generated data.</p>
-<p>In the &ldquo;human&rdquo; directory we put a file named driver. driver is a script that is supposed to be run without arguments from the &ldquo;machine&rdquo; directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of <code>_m</code>.</p>
+<p>In the “human” directory we put a file named driver. driver is a script that is supposed to be run without arguments from the “machine” directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of <code>_m</code>.</p>
 <p>This is principle 3: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]</p>
 <p>These 3 principles are desirable to help keep analysis organized, reproducible and easier to understand.</p>
-<p>A directory structure is a intuitive way to represent data dependencies. Let&rsquo;s say we are at some <code>_m</code> directory looking at output files, and we wonder how these files were generated. A pwd command will display the full path to that directory, which has a sequence of names of analysis steps involved in the generation of these files.</p>
-<p>Separation of computer-generated data from human-generated data is also nice. It is a way to make sure that users don&rsquo;t edit output files. It is also useful to know which files are program-generated, so we know which files are OK to delete because they can be computed again.</p>
-<p>Running driver scripts without arguments is a way to make sure computation doesn&rsquo;t depend on manually specified parameters, which are easy to forget.</p>
-<h2 id="version-control"><a name="user-content-version-control" href="#version-control" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Version control</h2>
+<p>A directory structure is a intuitive way to represent data dependencies. Let’s say we are at some <code>_m</code> directory looking at output files, and we wonder how these files were generated. A pwd command will display the full path to that directory, which has a sequence of names of analysis steps involved in the generation of these files.</p>
+<p>Separation of computer-generated data from human-generated data is also nice. It is a way to make sure that users don’t edit output files. It is also useful to know which files are program-generated, so we know which files are OK to delete because they can be computed again.</p>
+<p>Running driver scripts without arguments is a way to make sure computation doesn’t depend on manually specified parameters, which are easy to forget.</p>
+<h2 id="version-control"><a name="user-content-version-control" href="file:///tmp/114.html#version-control" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Version control</h2>
 <p>The separation of computer-generated data from human-generated data makes it easy to use version control systems for an analysis tree.</p>
 <p>In the current implementation we use git for <code>_h</code> and git-annex for <code>_m</code>. For some operations that involve more than one call to git or git annex, we provide a wrapper command <code>rf</code>.</p>
 <p>Using git, users can collaborate and share analyses trees in a similar they can do with code.</p>
-<h2 id="status"><a name="user-content-status" href="#status" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Status</h2>
+<h2 id="status"><a name="user-content-status" href="file:///tmp/114.html#status" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Status</h2>
 <p>This framework is in early stage of development, and contributors are very welcome.</p>
 <p>Current work includes, and some of these will be available soon:</p>
-<ul>
-<li>Docker support.</li>
-<li>More and better documentation.</li>
-<li>Concrete examples of analysis, mostly focusing on Bioinformatics.</li>
-<li>Use cases.</li>
-<li>Improvement of the manuscript.</li>
-<li>Support for git lfs.</li>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> Support for git lfs.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> More examples (Concrete examples of analysis, mostly focusing on Bioinformatics).</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> More tutorials.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> More and better documentation.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Improvement of the manuscript</li>
 </ul>
-<h2 id="contributing"><a name="user-content-contributing" href="#contributing" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Contributing</h2>
-<p>Please do!</p></article></body></html>
+<h2 id="contributing"><a name="user-content-contributing" href="file:///tmp/114.html#contributing" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Contributing</h2>
+<p>Please do!</p>
+<h2 id="license"><a name="user-content-license" href="file:///tmp/114.html#license" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>License</h2>
+<p>GNU GPL</p></article></body></html>
