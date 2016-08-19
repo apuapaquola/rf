@@ -140,7 +140,9 @@ def clone(repository, directory):
 
 
 def init_repo(node, annex=True, commit=True):
-    ''' init annex on node'''
+    """Init annex on node
+    """
+
     os.chdir(node)
     subprocess.check_call(['git', 'annex', 'init'])
     subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
@@ -150,9 +152,8 @@ def init_repo(node, annex=True, commit=True):
 
 
 def create_node(node, custom_templates=None, create_deps_folder=True, commit=True):
-    '''
-    Create rf folders and empty drivers
-    '''
+    """Create rf folders and empty drivers
+    """
 
     # Create Folders
     if not os.path.exists(node):
@@ -163,9 +164,9 @@ def create_node(node, custom_templates=None, create_deps_folder=True, commit=Tru
         os.makedirs(node + '/_h/dep')
 
     # 0o777 or stat.S_IXUSR see https://docs.python.org/2/library/stat.html
-    DRIVER_PERMISSIONS = [0o754]
+    driver_permissions = [0o754]
 
-    TEMPLATES = {'DRIVER': '''# Created with RF\n''' + \
+    templates = {'DRIVER': '''# Created with RF\n''' + \
                            '''echo 'running driver at {node}';\n''' + \
                            '''date > driver_output;\n''',
                  'README': '''# Created with RF\n''' + \
@@ -176,16 +177,16 @@ def create_node(node, custom_templates=None, create_deps_folder=True, commit=Tru
                  }
 
     if custom_templates:
-        TEMPLATES = custom_templates
+        templates = custom_templates
 
     if not os.path.isfile(node + '/_h/driver'):
         data = {'node': node[2:],
                 'parent_node': os.path.abspath(node)}
         with open(node + '/_h/README.md', 'w') as readme:
-            readme.write(TEMPLATES['README'].format(**data))
+            readme.write(templates['README'].format(**data))
         with open(node + '/_h/driver', 'w') as driver:
-            driver.write(TEMPLATES['DRIVER'].format(**data))
-        for perm in DRIVER_PERMISSIONS:
+            driver.write(templates['DRIVER'].format(**data))
+        for perm in driver_permissions:
             os.chmod(node + '/_h/driver', perm)
 
     if commit:
