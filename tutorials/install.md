@@ -15,7 +15,7 @@ sudo apt-get install git git-annex
 ### Set your python env or simply use sudo to install RF
 
 #### Install with pip
-pip install git+git://github.com/apuapaquola/rf.git
+pip install -U git+git://github.com/apuapaquola/rf.git
 
 #### Or download and install manually
 python rf/setup.py install

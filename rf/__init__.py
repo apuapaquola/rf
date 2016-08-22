@@ -66,6 +66,13 @@ def create_node(args):
                       create_deps_folder=args.create_deps_folder, commit=args.commit)
 
 
+def init_repo(args):
+    """Create a new node
+    :return:
+    """
+    rflib.init_repo(node=args.node, annex=args.annex, make_commit=args.commit)
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -86,11 +93,18 @@ def main():
 
     parser_create_node = subparsers.add_parser('create_node',
                                                help='create a node with folders and empty files')
-    parser_create_node.add_argument('-templates', '--custom_templates', action='store_true')
+    parser_create_node.add_argument('-templates', '--custom_templates')
     parser_create_node.add_argument('-deps', '--create_deps_folder', action='store_true')
     parser_create_node.add_argument('-c', '--commit', action='store_true')
     parser_create_node.add_argument('node')
     parser_create_node.set_defaults(func=create_node)
+
+    parser_init_repo = subparsers.add_parser('init_repo',
+                                             help='Start version control on folder')
+    parser_init_repo.add_argument('-a', '--annex', action='store_true')
+    parser_init_repo.add_argument('-c', '--commit', action='store_true')
+    parser_init_repo.add_argument('node')
+    parser_init_repo.set_defaults(func=init_repo)
 
     parser_clone = subparsers.add_parser('clone', help='clone an analysis tree')
     parser_clone.add_argument('repository')
