@@ -22,6 +22,7 @@ import subprocess
 import functools
 import shutil
 
+
 __author__ = 'Apua Paquola'
 
 
@@ -136,20 +137,24 @@ def clone(repository, directory):
     """Clones a tree
     """
     subprocess.check_call(['git', 'clone', repository, directory])
-    init_repo(directory)
+    # init_repo(directory)
 
 
 def init_repo(node, annex=True, make_commit=True):
     """Init annex on node
     """
     os.chdir(node)
+
+    # Danger
+    shutil.rmtree('.git/')
+
     subprocess.check_call(['git', 'init'])
 
     if annex:
         subprocess.check_call(['git', 'annex', 'init'])
 
     if make_commit:
-        commit(node, recursive=False, message='Started the repo, commited using rf')
+        commit('.', recursive=True, message='Started the repo, commited using rf')
 
 
 def create_node(node, custom_templates=None, create_deps_folder=True, make_commit=True):

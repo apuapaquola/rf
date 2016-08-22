@@ -45,4 +45,27 @@ find .
 ```
 rf create_node my_new_analysis
 ```
+
+### Start from another
+
+Clone the example
+```
+rf clone git@52.67.129.216:/opt/git/rf_example.git tests
+```
+
+Restart the git
+```
+cd tests/
+rf init_repo . -ac
+```
+
+
+# To add a remote
+
+```
+https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes
+https://git-annex.branchable.com/walkthrough/adding_a_remote/
+```
+
 ...
+
