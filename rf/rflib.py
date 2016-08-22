@@ -144,8 +144,8 @@ def init_repo(node, annex=True, commit=True):
     """
 
     os.chdir(node)
+    subprocess.check_call(['git', 'init'])
     subprocess.check_call(['git', 'annex', 'init'])
-    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
 
     if commit:
         commit(node, recursive=False, message='Started the repo, commited using rf')

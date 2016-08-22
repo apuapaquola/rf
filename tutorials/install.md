@@ -6,6 +6,12 @@
 #####################################################
 #####################################################
 
+### Install git and git-annex
+*You will need administrative privileges for this part*
+```
+sudo apt-get install git git-annex
+```
+
 ### Set your python env or simply use sudo to install RF
 
 #### Install with pip
@@ -20,7 +26,7 @@ pip install --install-option="--prefix=$PREFIX_PATH" rf
 ## IMPORTANT
 
 RF has some problems with older versions of Make
-If you have a older version, please upgrade
+If you have an older version, please upgrade
 
 To check make version:
 

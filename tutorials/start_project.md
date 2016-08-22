@@ -12,6 +12,11 @@
 git clone git@server_ip_or_domain:/opt/git/rf_example.git
 ```
 
+or 
+
+```
+rf clone git@server_ip_or_domain:/opt/git/rf_example.git
+```
 
 #### To start a new analysis
 
