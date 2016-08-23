@@ -146,7 +146,8 @@ def init_repo(node, annex=True, make_commit=True):
     os.chdir(node)
 
     # Danger
-    shutil.rmtree('.git/')
+    if os.path.exists('.git/'):
+        shutil.rmtree('.git/')
 
     subprocess.check_call(['git', 'init'])
 
@@ -157,7 +158,7 @@ def init_repo(node, annex=True, make_commit=True):
         commit('.', recursive=True, message='Started the repo, commited using rf')
 
 
-def create_node(node, custom_templates=None, create_deps_folder=True, make_commit=True):
+def create_node(node, custom_templates=None, create_deps_folder=True, make_commit=True, root_node=False):
     """Create rf folders and empty drivers
     """
 
@@ -195,7 +196,9 @@ def create_node(node, custom_templates=None, create_deps_folder=True, make_commi
         for perm in driver_permissions:
             os.chmod(node + '/_h/driver', perm)
 
-    if commit:
+    if root_node:
+        init_repo(node)
+    elif commit:
         commit(node, recursive=False, message='Started the node %s, commited using rf' % node)
 
 

@@ -63,7 +63,8 @@ def create_node(args):
     :return:
     """
     rflib.create_node(node=args.node, custom_templates=args.custom_templates,
-                      create_deps_folder=args.create_deps_folder, commit=args.commit)
+                      create_deps_folder=args.create_deps_folder,
+                      make_commit=args.commit, root_node=args.root_node)
 
 
 def init_repo(args):
@@ -96,6 +97,7 @@ def main():
     parser_create_node.add_argument('-templates', '--custom_templates')
     parser_create_node.add_argument('-deps', '--create_deps_folder', action='store_true')
     parser_create_node.add_argument('-c', '--commit', action='store_true')
+    parser_create_node.add_argument('-r', '--root_node', action='store_true')
     parser_create_node.add_argument('node')
     parser_create_node.set_defaults(func=create_node)
 
