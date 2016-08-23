@@ -151,6 +151,8 @@ def init_repo(node, annex=True, make_commit=True):
 
     subprocess.check_call(['git', 'init'])
 
+    # .git/annex/
+
     if annex:
         subprocess.check_call(['git', 'annex', 'init'])
 
