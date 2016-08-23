@@ -29,8 +29,7 @@ rf clone git@52.67.129.216:/opt/git/rf_example.git tests
 
 Restart the git
 ```
-cd tests/
-rf init_repo . -ac
+rf init_repo tests/ -ac
 ```
 
 #### To start a new analysis
@@ -79,7 +78,6 @@ vi my_new_analysis/_h/driver
 
 Run the driver
 ```
-cd my_new_analysis
 rf run my_new_analysis -v
 ```
 
