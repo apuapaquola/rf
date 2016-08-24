@@ -140,9 +140,43 @@ def clone(repository, directory):
     # init_repo(directory)
 
 
-def init_repo(node, annex=True, make_commit=True):
+def getfilenames(root):
+    for path, subdirs, files in os.walk(root):
+        for name in files:
+            yield os.path.join(path, name)
+
+
+def info(node):
+    '''Basic info about the repo
+    '''
+    assert(os.path.isdir(node))
+
+    os.chdir(node)
+
+    rev_parse = subprocess.Popen(['git rev-parse --show-toplevel'], stdout=subprocess.PIPE, shell=True)
+    (out, err) = rev_parse.communicate()
+    assert(err is None)
+
+    root_path = out.replace('\n', '')
+    info_dic = {'root_path': root_path}
+
+    if os.path.isdir(root_path + '/.git/annex'):
+        info_dic['type'] = 'annex'
+    elif os.path.isdir(root_path + '/.git/lfs'):
+        info_dic['type'] = 'lfs'
+
+    return info_dic
+
+
+def init(node, annex=False, lfs=False, create_root_node=False, make_commit=True):
     """Init annex on node
     """
+
+    if not os.path.exists(node):
+        os.makedirs(node)
+
+    assert(os.path.isdir(node))
+
     os.chdir(node)
 
     # Danger
@@ -151,16 +185,26 @@ def init_repo(node, annex=True, make_commit=True):
 
     subprocess.check_call(['git', 'init'])
 
-    # .git/annex/
+    message = 'Started the repo, commited using rf'
 
     if annex:
+        message += ' and git-annex'
+        print(message)
         subprocess.check_call(['git', 'annex', 'init'])
+    elif lfs:
+        message += ' and git lfs'
+        print(message)
+        subprocess.check_call(['git', 'lfs', 'install', '--skip-smudge'])
+        # --skip-smudge: Skips automatic downloading of objects. Requires "git lfs pull"
+
+    if create_root_node:
+        create_node(node, custom_templates=None, create_deps_folder=True, make_commit=False)
 
     if make_commit:
-        commit('.', recursive=True, message='Started the repo, commited using rf')
+        commit('.', recursive=True, message=message)
 
 
-def create_node(node, custom_templates=None, create_deps_folder=True, make_commit=True, root_node=False):
+def create_node(node, custom_templates=None, create_deps_folder=True, make_commit=True):
     """Create rf folders and empty drivers
     """
 
@@ -198,9 +242,7 @@ def create_node(node, custom_templates=None, create_deps_folder=True, make_commi
         for perm in driver_permissions:
             os.chmod(node + '/_h/driver', perm)
 
-    if root_node:
-        init_repo(node)
-    elif commit:
+    if commit:
         commit(node, recursive=False, message='Started the node %s, commited using rf' % node)
 
 
@@ -244,8 +286,13 @@ def get(node, recursive=False):
 
     machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
 
-    subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
-    subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
+    info_dic = info(node)
+    if info_dic['type'] == 'annex':
+        subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
+        subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
+    if info_dic['type'] == 'lfs':
+        # https://github.com/github/git-lfs/blob/master/docs/man/git-lfs-fetch.1.ronn
+        subprocess.check_call(['git', 'lfs', 'fetch', '-I'] + machine_dirs)
 
 
 def commit(node, recursive=False, message='commited using rf'):
@@ -261,10 +308,25 @@ def commit(node, recursive=False, message='commited using rf'):
 
     try:
         subprocess.check_call(['git', 'add'] + human_dirs)
-        subprocess.check_call(['git', 'annex', 'add'] + machine_dirs)
+
+        info_dic = info(node)
+        if info_dic['type'] == 'annex':
+            subprocess.check_call(['git', 'annex', 'add'] + machine_dirs)
+        elif info_dic['type'] == 'lfs':
+            machine_filenames = [x for m in machine_dirs for x in getfilenames(m)]
+            subprocess.check_call(['git', 'lfs', 'track'] + machine_dirs)
+            subprocess.check_call(['git', 'lfs', 'track'] + machine_filenames)
+
+            subprocess.check_call(['git', 'add'] + machine_dirs)
+            # go to root
+            os.chdir(info_dic['root_path'])
+            subprocess.check_call(['git', 'add', '.gitattributes'])
+            # subprocess.check_call(['git', 'lfs', 'status'])
+
         subprocess.check_call(['git', 'commit', '-m', message] + human_dirs + machine_dirs)
-    except subprocess.CalledProcessError:
-        raise
+    except subprocess.CalledProcessError as e:
+        if e.returncode != 1:
+            raise
 
 
 def rule_string(dependencies, node, driver_script_command_function):
@@ -289,8 +351,9 @@ def rule_string(dependencies, node, driver_script_command_function):
                            '''\techo -n "Start {node}: "; date --rfc-3339=seconds\n''' + \
                            '''\tmkdir {node}/_m\n''' + \
                            '''\tcd {node}/_m\n''' + \
+                           '''\techo "Start {node}: $(date --rfc-3339=seconds)" > SUCCESS;''' + \
                            '''\t{command}\n''' + \
-                           '''\ttouch SUCCESS\n''' + \
+                           '''\techo "End {node}: $(date --rfc-3339=seconds)" >> SUCCESS;''' + \
                            '''\techo -n "End {node}: "; date --rfc-3339=seconds\n'''
 
     data = {'success_file': success_file(node), 'dep_string': dep_string,

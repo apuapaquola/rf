@@ -64,14 +64,25 @@ def create_node(args):
     """
     rflib.create_node(node=args.node, custom_templates=args.custom_templates,
                       create_deps_folder=args.create_deps_folder,
-                      make_commit=args.commit, root_node=args.root_node)
+                      make_commit=args.commit)
 
 
-def init_repo(args):
+def init(args):
     """Create a new node
     :return:
     """
-    rflib.init_repo(node=args.node, annex=args.annex, make_commit=args.commit)
+    if args.annex == args.lfs:
+        print('Sorry, you need to choose one (annex or lfs)')
+    else:
+        rflib.init(node=args.node, annex=args.annex, lfs=args.lfs,
+                   create_root_node=args.create_root_node, make_commit=args.commit)
+
+
+def info(args):
+    """Check a repo
+    :return:
+    """
+    rflib.info(node=args.node)
 
 
 def main():
@@ -97,16 +108,16 @@ def main():
     parser_create_node.add_argument('-templates', '--custom_templates')
     parser_create_node.add_argument('-deps', '--create_deps_folder', action='store_true')
     parser_create_node.add_argument('-c', '--commit', action='store_true')
-    parser_create_node.add_argument('-r', '--root_node', action='store_true')
     parser_create_node.add_argument('node')
     parser_create_node.set_defaults(func=create_node)
 
-    parser_init_repo = subparsers.add_parser('init_repo',
-                                             help='Start version control on folder')
-    parser_init_repo.add_argument('-a', '--annex', action='store_true')
-    parser_init_repo.add_argument('-c', '--commit', action='store_true')
-    parser_init_repo.add_argument('node')
-    parser_init_repo.set_defaults(func=init_repo)
+    parser_init = subparsers.add_parser('init', help='Start version control on folder')
+    parser_init.add_argument('-a', '--annex', action='store_true')
+    parser_init.add_argument('-l', '--lfs', action='store_true')
+    parser_init.add_argument('-n', '--create_root_node', action='store_true')
+    parser_init.add_argument('-c', '--commit', action='store_true')
+    parser_init.add_argument('node')
+    parser_init.set_defaults(func=init)
 
     parser_clone = subparsers.add_parser('clone', help='clone an analysis tree')
     parser_clone.add_argument('repository')
@@ -118,6 +129,10 @@ def main():
     parser_commit.add_argument('-m', '--message', required=True)
     parser_commit.add_argument('node')
     parser_commit.set_defaults(func=commit)
+
+    parser_info = subparsers.add_parser('info', help='info about the repo')
+    parser_info.add_argument('node')
+    parser_info.set_defaults(func=info)
 
     parser_get = subparsers.add_parser('get', help='get machine data')
     parser_get.add_argument('-r', '--recursive', action='store_true')
