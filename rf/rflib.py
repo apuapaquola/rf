@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-""" rf - A framework for collaborative computational research
+""" rf - A framework for collaborative data analysis
 
-    Copyright (C) 2015 Apua Paquola <apuapaquola@gmail.com>
+    Copyright (C) 2015 Apuã Paquola <apuapaquola@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,12 +31,13 @@ def is_ready_to_run(node):
     Args:
         node: a directory (node)
     Returns:
-        bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an executable driver script at _h/
+        bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an
+         executable driver script at _h/
     """
-    return node is not None and \
-           os.path.isdir(node + '/_h') and \
-           not os.path.exists(node + '/_m') and \
-           os.access(node + '/_h/driver', os.X_OK)
+    return node is not None\
+        and os.path.isdir(node + '/_h')\
+        and not os.path.exists(node + '/_m')\
+        and os.access(node + '/_h/driver', os.X_OK)
 
 
 def find_dependencies(node, recursive):
@@ -47,7 +48,8 @@ def find_dependencies(node, recursive):
         recursive (bool): whether to look at the entire tree recursively.
 
     Yields:
-        (list, str): a tuple that contains a list of dependencies and a node, for each node of the tree that is ready to run.
+        (list, str): a tuple that contains a list of dependencies and a node, for each node
+         of the tree that is ready to run.
 
     """
     assert os.path.isdir(node)
@@ -61,16 +63,17 @@ def find_dependencies(node, recursive):
                         is_ready_to_run(os.path.realpath(x)) and
                         belongs_to_tree(x, node)]
 
-        if is_ready_to_run(os.path.realpath(child)) and \
-           belongs_to_tree(child, node):
+        if is_ready_to_run(os.path.realpath(child)) and belongs_to_tree(child, node):
             yield (dependencies, child)
 
         if recursive:
-            queue.extend(((child, xx) for xx in filter(os.path.isdir, (os.path.join(child,x) for x in os.listdir(child) if x not in ['_h','_m']))))
+            queue.extend(((child, xx) for xx in filter(os.path.isdir,
+                                                       (os.path.join(child, x) for x in os.listdir(child) if
+                                                        x not in ['_h', '_m']))))
 
 
 def driver_script_command_native(node):
-    assert(os.path.isdir(node))
+    assert (os.path.isdir(node))
     return '../_h/driver > nohup.out 2>&1'
 
 
@@ -86,9 +89,9 @@ def driver_script_command_docker(node, docker_image):
         A driver script calling command
 
     """
-    assert(os.path.isdir(node))
+    assert (os.path.isdir(node))
     if node is not None and \
-        os.path.isdir(node + '/_h') and \
+            os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/docker_driver', os.X_OK):
         return '../_h/docker_driver > nohup.out 2>&1'
 
@@ -97,7 +100,7 @@ def driver_script_command_docker(node, docker_image):
 
         return ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
                 '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''') % \
-                (base_node, base_node, node, node, docker_image, node)
+               (base_node, base_node, node, node, docker_image, node)
 
 
 def success_file(node):
@@ -144,11 +147,11 @@ def dependency_links(node):
 
     """
 
-    depdir = node+'/_h/dep'
-    if os.path.isdir(depdir):
-        for x in os.listdir(depdir):
-            if os.path.islink(depdir+'/'+x) and os.path.isdir(depdir+'/'+x):
-                yield os.path.realpath(depdir+'/'+x)
+    dep_dir = node + '/_h/dep'
+    if os.path.isdir(dep_dir):
+        for x in os.listdir(dep_dir):
+            if os.path.islink(dep_dir + '/' + x) and os.path.isdir(dep_dir + '/' + x):
+                yield os.path.realpath(dep_dir + '/' + x)
 
 
 def belongs_to_tree(dirname, basedir):
@@ -161,7 +164,7 @@ def belongs_to_tree(dirname, basedir):
 
     """
     assert os.path.isdir(dirname) and os.path.isdir(basedir)
-    return (os.path.realpath(dirname)+'/').startswith(os.path.realpath(basedir)+'/')
+    return (os.path.realpath(dirname) + '/').startswith(os.path.realpath(basedir) + '/')
 
 
 def makefile(dependency_iter, rule_string_function):
@@ -189,7 +192,7 @@ def makefile(dependency_iter, rule_string_function):
         makefile_string += rule_string_function([], node)
 
     makefile_string = 'all: ' + ' '.join(map(success_file, dependency_set.union(child_set))) + \
-        '\n\n' + makefile_string
+                      '\n\n' + makefile_string
 
     return makefile_string
 
@@ -223,5 +226,3 @@ def run(args):
         print(mf)
     if not args.dry_run:
         run_make(mf)
-
-

@@ -1,4 +1,4 @@
-## rf - A framework for collaborative computational research
+## rf - A framework for collaborative data analysis
 
 ```
 pip install git+git://github.com/apuapaquola/rf.git
@@ -60,7 +60,6 @@ In the current implementation we use git for `_h` and git-annex for `_m`. For so
 Using git, users can collaborate and share analyses trees in a similar they can do with code.
 
 
-
 ## Status
 
 This framework is in early stage of development, and contributors are very welcome.
@@ -78,3 +77,7 @@ Current work includes, and some of these will be available soon:
 ## Contributing
 
 Please do!
+
+## License
+
+GNU GPLv3

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-""" rf - A framework for collaborative computational research
+""" rf - A framework for collaborative data analysis
 
-    Copyright (C) 2015 Apua Paquola <apuapaquola@gmail.com>
+    Copyright (C) 2015 Apuã Paquola <apuapaquola@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
