@@ -16,10 +16,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
 import argparse
 import os
 import shutil
 import subprocess
+import re
 
 from . import rflib
 
@@ -123,6 +125,47 @@ def get(args):
     subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
 
 
+def node_status(node):
+    """Returns node status"""
+    if not os.path.isdir(node + '/_h'):
+        return 'no _h'
+    elif not (os.path.exists(node + '/_h/driver') and os.access(node + '/_h/driver', os.X_OK)):
+        return 'no driver'
+    elif not os.path.isdir(node + '/_m'):
+        return 'ready to run'
+    elif os.path.exists(node + '/_m/SUCCESS'):
+        return 'done'
+    else:
+        return 'incomplete'
+
+
+def pretty_print_status(args):
+    """Prints status of all nodes in a subtree
+    """
+    command = ['tree', '--noreport', '-d', '-I', '_h|_m'] + [args.node]
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
+    maxlen = max((len(x.decode().rstrip()) for x in p.stdout))
+
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
+
+    path = []
+    for line in p.stdout:
+        l = line.decode().rstrip()
+        m = re.search('(─ )?([^─]*)$', l)
+        pos = m.start(2) // 4
+        del path[pos:]
+        path.append(m.group(2))
+        node = '/'.join(path)
+        s = node_status(node)
+        print(l, ' ' * (maxlen - len(l) + 13 - len(s)), s)
+
+
+def print_tree(args):
+    """Prints directory tree under a node.
+    """
+    subprocess.check_call(['tree', '--noreport', '-d', '-I', '_h|_m'] + [args.node])
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -156,6 +199,14 @@ def main():
     parser_get.add_argument('-r', '--recursive', action='store_true')
     parser_get.add_argument('node')
     parser_get.set_defaults(func=get)
+
+    parser_get = subparsers.add_parser('status', help='print analysis tree status')
+    parser_get.add_argument('node', nargs='?', default='.')
+    parser_get.set_defaults(func=pretty_print_status)
+
+    parser_get = subparsers.add_parser('tree', help='print analysis tree')
+    parser_get.add_argument('node', nargs='?', default='.')
+    parser_get.set_defaults(func=print_tree)
 
     args = parser.parse_args()
 
