@@ -108,7 +108,7 @@ def commit(args):
 
 
 def get(args):
-    """Fetches real machine data from origin repository
+    """Fetches contents of machine directories from origin repository
     :param args:
     :return:
     """
@@ -152,7 +152,7 @@ def main():
     parser_commit.add_argument('node')
     parser_commit.set_defaults(func=commit)
 
-    parser_get = subparsers.add_parser('get', help='get machine data')
+    parser_get = subparsers.add_parser('get', help='get machine directory contents from origin repository')
     parser_get.add_argument('-r', '--recursive', action='store_true')
     parser_get.add_argument('node')
     parser_get.set_defaults(func=get)
