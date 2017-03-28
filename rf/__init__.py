@@ -25,7 +25,7 @@ import re
 
 from . import rflib
 
-__author__ = 'Apua Paquola'
+__author__ = 'Apuã Paquola'
 
 
 def nodes(parent):
@@ -129,6 +129,10 @@ def node_status(node):
     """Returns node status"""
     if not os.path.isdir(node + '/_h'):
         return 'no _h'
+    elif os.path.exists(node + '/_h/driver') and os.path.exists(node + '/_h/yield'):
+        return 'driver/yield inconsistency'
+    elif os.path.exists(node + '/_h/yield'):
+        return 'yield'
     elif not (os.path.exists(node + '/_h/driver') and os.access(node + '/_h/driver', os.X_OK)):
         return 'no driver'
     elif not os.path.isdir(node + '/_m'):

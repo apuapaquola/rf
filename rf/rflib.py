@@ -22,7 +22,7 @@ import os
 import subprocess
 import functools
 
-__author__ = 'Apua Paquola'
+__author__ = 'Apuã Paquola'
 
 
 def is_ready_to_run(node):
@@ -32,11 +32,12 @@ def is_ready_to_run(node):
         node: a directory (node)
     Returns:
         bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an
-         executable driver script at _h/
+         executable driver script at _h/ and there is no 'yield' file in _h
     """
     return node is not None\
         and os.path.isdir(node + '/_h')\
         and not os.path.exists(node + '/_m')\
+        and not os.path.exists(node + '/_h/yield')\
         and os.access(node + '/_h/driver', os.X_OK)
 
 
@@ -78,8 +79,11 @@ def driver_script_command_native(node):
 
 
 def driver_script_command_docker(node, docker_image):
-    """If the file node/_h/docker_driver exists, then a command called it is generated. Otherwise,
+    """If the file node/_h/docker_driver exists, then a command calling it is generated. Otherwise,
     a standard docker run call is generated using docker_image.
+
+    The standard docker run call mounts the base directory (where .git is located) as read_only and
+    current _m directory as read-write.
 
     Args:
         node: a node of the tree
@@ -172,6 +176,8 @@ def makefile(dependency_iter, rule_string_function):
 
     Args:
         dependency_iter (iterable on list of tuples): output of find_human_dirs
+        rule_string_function: a function that generates a rule string. See function rule_string.
+
     Returns:
         str: a makefile
 

@@ -26,7 +26,7 @@ from argparse import Namespace
 import rflib
 
 
-__author__ = 'Apua Paquola'
+__author__ = 'Apuã Paquola'
 
 
 class UnitTests(unittest.TestCase):
