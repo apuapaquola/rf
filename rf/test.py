@@ -79,4 +79,4 @@ class UnitTests(unittest.TestCase):
 
     def test_run_docker(self):
         """Runs a test tree with docker"""
-        self.skel_test_run('u2')
+        self.skel_test_run('myarch_ngs')

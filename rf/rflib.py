@@ -17,10 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import argparse
 import os
 import subprocess
 import functools
+import yaml
 
 __author__ = 'Apuã Paquola'
 
@@ -78,6 +78,41 @@ def driver_script_command_native(node):
     return '../_h/driver > nohup.out 2>&1'
 
 
+def get_basedir():
+    """Gets the root of the analysis tree. The one that contains the .git directory"""
+    return subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
+
+
+def get_config_parameter(key):
+    """Gets a configuration parameter from the config file or from the defaults defined here
+
+    :param key:
+    :return:
+    """
+
+    defaults = {
+        'always_use_docker': False,
+        'default_docker_run_command':
+            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
+            '''bash -c 'cd "{node}/_m" && ../_h/driver > nohup.out 2>&1' '''
+    }
+
+    config = {}
+
+    try:
+        with open(get_basedir()+'/.cdaconfig', 'r') as f:
+            config = yaml.load(f)
+    except:
+        pass
+
+    if key in config:
+        return config[key]
+    elif key in defaults:
+        return defaults[key]
+    else:
+        return None
+
+
 def driver_script_command_docker(node, docker_image):
     """If the file node/_h/docker_driver exists, then a command calling it is generated. Otherwise,
     a standard docker run call is generated using docker_image.
@@ -97,14 +132,11 @@ def driver_script_command_docker(node, docker_image):
     if node is not None and \
             os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/docker_driver', os.X_OK):
-        return '../_h/docker_driver > nohup.out 2>&1'
+        return '../_h/docker_driver'
 
     else:
-        base_node = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
-
-        return ('''docker run -v '%s':'%s':ro -v '%s/_m':'%s/_m' '%s' ''' +
-                '''bash -c 'cd "%s/_m" && ../_h/driver > nohup.out 2>&1' ''') % \
-               (base_node, base_node, node, node, docker_image, node)
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(),
+                                                                         node=node, docker_image=docker_image)
 
 
 def success_file(node):
@@ -162,7 +194,8 @@ def belongs_to_tree(dirname, basedir):
     """Tests if a node belongs to a tree.
 
     Args:
-        dirname (str): a directory (node)
+        dirname: a directory (node)
+        basedir: the root of the analysis tree
     Returns:
         bool: True if the node is under basedir.
 
@@ -219,7 +252,7 @@ def run(args):
     """Implements rf run
     arguments from command line"""
 
-    if args.docker_image is not None:
+    if args.docker_image is not None or get_config_parameter('always_use_docker'):
         dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
     else:
         dscf = driver_script_command_native
