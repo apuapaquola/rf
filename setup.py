@@ -16,8 +16,11 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
     ],
-    keywords='bioinformatics reproducibility collaboration workflpw git',
+    keywords='bioinformatics reproducibility collaboration workflow git',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    install_requires=[
+        'yaml'
+    ],
     entry_points={
         'console_scripts': [
             'rf=rf:main',
