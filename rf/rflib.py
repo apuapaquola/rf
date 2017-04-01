@@ -38,7 +38,7 @@ def is_ready_to_run(node):
         and os.path.isdir(node + '/_h')\
         and not os.path.exists(node + '/_m')\
         and not os.path.exists(node + '/_h/yield')\
-        and os.access(node + '/_h/driver', os.X_OK)
+        and os.access(node + '/_h/run', os.X_OK)
 
 
 def find_dependencies(node, recursive):
@@ -75,7 +75,7 @@ def find_dependencies(node, recursive):
 
 def driver_script_command_native(node):
     assert (os.path.isdir(node))
-    return '../_h/driver > nohup.out 2>&1'
+    return '../_h/run > nohup.out 2>&1'
 
 
 def get_basedir():
@@ -94,7 +94,7 @@ def get_config_parameter(key):
         'always_use_docker': False,
         'default_docker_run_command':
             '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
-            '''bash -c 'cd "{node}/_m" && ../_h/driver > nohup.out 2>&1' '''
+            '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
 
     config = {}
@@ -114,7 +114,7 @@ def get_config_parameter(key):
 
 
 def driver_script_command_docker(node, docker_image):
-    """If the file node/_h/docker_driver exists, then a command calling it is generated. Otherwise,
+    """If the file node/_h/docker_run exists, then a command calling it is generated. Otherwise,
     a standard docker run call is generated using docker_image.
 
     The standard docker run call mounts the base directory (where .git is located) as read_only and
@@ -131,8 +131,8 @@ def driver_script_command_docker(node, docker_image):
     assert (os.path.isdir(node))
     if node is not None and \
             os.path.isdir(node + '/_h') and \
-            os.access(node + '/_h/docker_driver', os.X_OK):
-        return '../_h/docker_driver'
+            os.access(node + '/_h/docker_run', os.X_OK):
+        return '../_h/docker_run'
 
     else:
         return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(),

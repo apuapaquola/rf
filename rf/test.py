@@ -36,14 +36,15 @@ class UnitTests(unittest.TestCase):
         """Creates dummy analysis tree and inits the git repo. It cds to 'dummy' """
         with open("dummy.tar.gz", "wb") as f:
             f.write(base64.b64decode(
-                b'H4sIAFWidVcAA+2Z3WqDQBBGve5TWHof98d17wpN0+coGoXkIk3QpLRv310VKpPQRqqjpN9BIm6ELBx3vh2Tn3a7z' +
-                b'ygYFeGwxviztEbU1zKO63NLIJXVRiuR+PukFEkShGbcaTWcqmNahmGQHk7pz/cVZcUxIV7y2v/bPi+eRnsKrvcvY6' +
-                b'Hc91JJIeGfg67/1804j0Cf9W917T+2MfxzQPzn5fa9KAf+jV/9W9P6d+NCOf/aClf/xcDzuMg/9/9wH2Xbt6ja3BX' +
-                b'rzT5MZfgYVnJx/Di2A8oPqM6A9gO6Hph68uDPfK//l3nlv0H956Drf/r8F8I9Ash/Roj/yfO/8a+ttMh/Dkj+FzT/' +
-                b'C5r/BfL/lqDrvzgMnwFX13/ltv1W+/WvEoX6z8EF//5iNeRv1P6t7eHfuvuDUC0WUXP4KS2Hn5gH/lv/y3nt/7H+W' +
-                b'ej695/PIzwF/f1rlwDwz8G5/+G7wD79nw9+598oDf8cXPQ/cBfYp/9r/Lv2H+9/WSD935r2f2va/63R/90S3fU/h/' +
-                b'd/0srm/R/ynwXif/L3f41/baVB/eeA1P+M1v+M1v8M9f+WoPu/1Vz6P+z/WTj3P23/5466/5P4/5eFi/4n7P8a/67' +
-                b'/E8h/Dkj+5zT/c5r/OfIfAAAAAAAAAAAAAAAAAAAAAAAAAACAufAFz1n1KgBQAAA='))
+                b'H4sIAAAAAAAAA+2Z22qDQBRFfe5XTOl7nEvGeSs0Tb+jeIP0IRdihPbvO2MCkZPQRqpHSfdCIo6C' +
+                b'A/tc9jFFvV5/xdGgSI+zNpyVs7K5VvN5cz4RKe2MNVom4TmlZJJEwg67rSN1dUj3QkTprk5/fq7c' +
+                b'Vxwb4qVo9N9si/JlsCi4XX81l9rfV1pJBf05aOv/vhomBG7S38jE2cSHQMh/baWF/hwQ/ff1pv93' +
+                b'/Kq/s6f89+tSe/2NVi4Ssv+tXPLP9X96jLOPTVytHsp8tRWpEs+iUrPD5+G0oMOCbi2YsGCahbE3' +
+                b'D/7MOf/fptX/Uf9ZaOs/pf6v4P9YIPoX5a7/GLg5/7XzQWCa/p9o6M/BFf3DxbLPdzT6O9dBf+ef' +
+                b'j4SezeLjEba06H9jAejf1n90/+8tQJP/RsL/c0D8f0n9f0n9fwn/f0+c838xLf+P/s9CW//w+zpA' +
+                b'FHTX3/gOAP05uNS//ymw+/znQwH//7BwVf+eXWAX/xcGP39TW3z/ZYH4v5z6v5z6vxz+755o5/+U' +
+                b'vv9J1H8WiP6jz//KqWb+1wnqPwek/me0/me0/meo//cE9X/Lqcx/BvWfg0v9JzL/OejPwVX9R5z/' +
+                b'/HGc/xT6Pwek/xe0/xe0/xfo/wAAAAAAAAAAAAAAAAAAAAAAAAAAAEyFb6LrQrMAUAAA'))
 
         subprocess.check_call(['tar', 'xfz', 'dummy.tar.gz'])
         os.chdir('dummy')

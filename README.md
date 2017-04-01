@@ -36,7 +36,7 @@ Each node has two special subdirectories: `_h` and `_m` with distinct purposes. 
 
 This is principle 2: separation of user-generated data from program-generated data.
 
-In the "human" directory we put a file named driver. driver is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
+In the "human" directory we put a file named `run`. `run` is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
 
 This is principle 3: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
 
