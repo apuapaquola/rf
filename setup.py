@@ -19,7 +19,7 @@ setup(
     keywords='bioinformatics reproducibility collaboration workflow git',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
-        'yaml'
+        'PyYAML'
     ],
     entry_points={
         'console_scripts': [
