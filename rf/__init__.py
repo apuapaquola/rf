@@ -161,7 +161,10 @@ def pretty_print_status(args):
         path.append(m.group(2))
         node = '/'.join(path)
         s = node_status(node)
-        print(l, ' ' * (maxlen - len(l) + 13 - len(s)), s)
+        if args.parseable:
+            print(node, s, sep='\t')
+        else:
+            print(l, ' ' * (maxlen - len(l) + 13 - len(s)), s)
 
 
 def print_tree(args):
@@ -205,6 +208,7 @@ def main():
     parser_get.set_defaults(func=get)
 
     parser_get = subparsers.add_parser('status', help='print analysis tree status')
+    parser_get.add_argument('-p', '--parseable', action='store_true', help='prints path <tab> status for each node')
     parser_get.add_argument('node', nargs='?', default='.')
     parser_get.set_defaults(func=pretty_print_status)
 
