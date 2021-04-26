@@ -1,7 +1,7 @@
 ## rf - A framework for collaborative data analysis
 
 ```
-pip install git+git://github.com/apuapaquola/rf.git
+pip install git+git://github.com/ricardojacomini/rf.git
 ```
 
 ## Preprint 
