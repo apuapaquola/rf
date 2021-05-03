@@ -142,9 +142,9 @@ def driver_script_command_container(node, container_parameters, storage):
             os.access(node + '/_h/container_run', os.X_OK):
         return '../_h/container_run'
     elif '.sif' in container_parameters:
-        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, container-image=container_parameters)
+        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, container_image=container_parameters)
     else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, container-image=container_parameters, mount=storage)
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, container_image=container_parameters, mount=storage)
         	
 
 
@@ -260,8 +260,8 @@ def run_make(makefile_string):
 def run(args):
     """Implements rf run arguments from command line"""
 
-    if args.container-image is not None or get_config_parameter('always_use_container'):
-        dscf = functools.partial(driver_script_command_container, container-image=args.container-image, storage=args.storage)
+    if args.container_image is not None or get_config_parameter('always_use_container'):
+        dscf = functools.partial(driver_script_command_container, container_image=args.container_image, storage=args.storage)
     else:
         dscf = driver_script_command_native
 
