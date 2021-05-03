@@ -170,6 +170,7 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     return '''.ONESHELL:
 %s: %s
+\tset -euo pipefail
 \techo -n "Start %s: "; date --rfc-3339=seconds
 \tmkdir %s/_m
 \tcd %s/_m
