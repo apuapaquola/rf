@@ -28,7 +28,7 @@ from . import rflib
 __author__ = 'Apuã Paquola, Ricardo S jacomini'
 __email__ = "apuapaquola@gmail.com"
 __version__ = '2.0.0'
-__date__ = "April / 26 / 2021
+__date__ = "April / 26 / 2021"
 __status__ = "Development"
 
 
