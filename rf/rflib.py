@@ -94,7 +94,7 @@ def get_config_parameter(key):
     :return:
     """
 
-   defaults = {
+    defaults = {
         'always_use_docker': False,
         'default_docker_run_command':
             '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
@@ -136,15 +136,16 @@ def driver_script_command_container(node, container_parameters,storage):
 
     """
     assert (os.path.isdir(node))
+         	
     if node is not None and \
             os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/container_run', os.X_OK):
         return '../_h/container_run'
-
-    if '.sif' in container_parameters:
-	    	return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, singularity_image=container_parameters)
-	    else:
-        	return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, docker_image=container_parameters, mount=storage)
+    elif '.sif' in container_parameters:
+        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, singularity_image=container_parameters)
+    else:
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, docker_image=container_parameters, mount=storage)
+        	
 
 
 def success_file(node):
