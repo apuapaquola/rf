@@ -260,8 +260,8 @@ def run_make(makefile_string):
 def run(args):
     """Implements rf run arguments from command line"""
 
-    if args.container_parameters is not None or get_config_parameter('always_use_container'):
-        dscf = functools.partial(driver_script_command_container, container_parameters=args.container-image, storage=args.storage)
+    if args.container-image is not None or get_config_parameter('always_use_container'):
+        dscf = functools.partial(driver_script_command_container, container-image=args.container-image, storage=args.storage)
     else:
         dscf = driver_script_command_native
 
