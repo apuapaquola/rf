@@ -22,7 +22,11 @@ import subprocess
 import functools
 import yaml
 
-__author__ = 'Apuã Paquola'
+__author__ = 'Apuã Paquola, Ricardo S jacomini'
+__email__ = "apuapaquola@gmail.com"
+__version__ = '2.0.0'
+__date__ = "April / 26 / 2021
+__status__ = "Development"
 
 
 def is_ready_to_run(node):
@@ -90,13 +94,16 @@ def get_config_parameter(key):
     :return:
     """
 
-    defaults = {
+   defaults = {
         'always_use_docker': False,
         'default_docker_run_command':
             '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
+            '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' ''',
+        'default_singularity_run_command':
+            '''singularity shell --bind '{mount}' '{singularity_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
-
+    
     config = {}
 
     try:
@@ -113,16 +120,16 @@ def get_config_parameter(key):
         return None
 
 
-def driver_script_command_docker(node, docker_image):
-    """If the file node/_h/docker_run exists, then a command calling it is generated. Otherwise,
-    a standard docker run call is generated using docker_image.
+def driver_script_command_container(node, container_parameters,storage):
+    """If the file node/_h/container_run exists, then a command calling it is generated. Otherwise,
+    a standard container run call is generated using container parameters.
 
-    The standard docker run call mounts the base directory (where .git is located) as read_only and
+    The standard container run call mounts the base directory (where .git is located) as read_only and
     current _m directory as read-write.
 
     Args:
         node: a node of the tree
-        docker_image: name of docker image to use
+        container: parameters of container
 
     Returns:
         A driver script calling command
@@ -131,12 +138,13 @@ def driver_script_command_docker(node, docker_image):
     assert (os.path.isdir(node))
     if node is not None and \
             os.path.isdir(node + '/_h') and \
-            os.access(node + '/_h/docker_run', os.X_OK):
-        return '../_h/docker_run'
+            os.access(node + '/_h/container_run', os.X_OK):
+        return '../_h/container_run'
 
-    else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(),
-                                                                         node=node, docker_image=docker_image)
+    if '.sif' in container_parameters:
+	    	return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, singularity_image=container_parameters)
+	    else:
+        	return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, docker_image=container_parameters, mount=storage)
 
 
 def success_file(node):
@@ -249,11 +257,10 @@ def run_make(makefile_string):
 
 
 def run(args):
-    """Implements rf run
-    arguments from command line"""
+    """Implements rf run arguments from command line"""
 
-    if args.docker_image is not None or get_config_parameter('always_use_docker'):
-        dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
+    if args.container_parameters is not None or get_config_parameter('always_use_container'):
+        dscf = functools.partial(driver_script_command_container, container_parameters=args.container-image, storage=args.storage)
     else:
         dscf = driver_script_command_native
 

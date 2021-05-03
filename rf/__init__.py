@@ -25,7 +25,11 @@ import re
 
 from . import rflib
 
-__author__ = 'Apuã Paquola'
+__author__ = 'Apuã Paquola, Ricardo S jacomini'
+__email__ = "apuapaquola@gmail.com"
+__version__ = '2.0.0'
+__date__ = "April / 26 / 2021
+__status__ = "Development"
 
 
 def nodes(parent):
@@ -181,7 +185,10 @@ def main():
     parser_run.add_argument('-n', '--dry-run', action='store_true')
     parser_run.add_argument('-v', '--verbose', action='store_true')
     parser_run.add_argument('-r', '--recursive', action='store_true')
-    parser_run.add_argument('-d', '--docker-image')
+    #parser_run.add_argument('--docker', '--container-image')
+    parser_run.add_argument('--container-image')
+    parser_run.add_argument('--storage')
+    #parser_run.add_argument('--singularity', '--container-image')
     parser_run.add_argument('node')
     parser_run.set_defaults(func=run)
 
