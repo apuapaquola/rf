@@ -185,10 +185,8 @@ def main():
     parser_run.add_argument('-n', '--dry-run', action='store_true')
     parser_run.add_argument('-v', '--verbose', action='store_true')
     parser_run.add_argument('-r', '--recursive', action='store_true')
-    #parser_run.add_argument('--docker', '--container_image')
-    parser_run.add_argument('--container_image')
-    parser_run.add_argument('--storage')
-    #parser_run.add_argument('--singularity', '--container-image')
+    parser_run.add_argument('-d','--container_image', help='Docker / Singularity Container')
+    parser_run.add_argument('-s','--storage', help='directory to map on Singularity')
     parser_run.add_argument('node')
     parser_run.set_defaults(func=run)
 

@@ -7,7 +7,7 @@ setup(
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apua Paquola',
     author_email='apuapaquola@gmail.com',
-    url='https://github.com/ricardo.jacomini/rf',
+    url='https://github.com/ricardojacomini/rf',
     license='GPLv3',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha'

@@ -97,10 +97,10 @@ def get_config_parameter(key):
     defaults = {
         'always_use_docker': False,
         'default_docker_run_command':
-            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{container-image}' ''' +
+            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' ''',
         'default_singularity_run_command':
-            '''singularity shell --bind '{mount}' '{container-image}' ''' +
+            '''singularity shell --bind '{mount}' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
     
@@ -120,7 +120,7 @@ def get_config_parameter(key):
         return None
 
 
-def driver_script_command_container(node, container_parameters, storage):
+def driver_script_command_container(node, container_image, storage):
     """If the file node/_h/container_run exists, then a command calling it is generated. Otherwise,
     a standard container run call is generated using container parameters.
 
@@ -141,10 +141,10 @@ def driver_script_command_container(node, container_parameters, storage):
             os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/container_run', os.X_OK):
         return '../_h/container_run'
-    elif '.sif' in container_parameters:
-        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, container_image=container_parameters)
+    elif '.sif' in container_image:
+        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, mount=storage, container_image=container_image )
     else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, container_image=container_parameters, mount=storage)
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, container_image=container_image)
         	
 
 
@@ -266,7 +266,7 @@ def run(args):
         dscf = driver_script_command_native
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
-
+    
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
 
     if args.verbose:
