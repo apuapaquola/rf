@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='rf',
-    version='0.1.0.dev0',
+    version='0.1.0.dev1',
     description='A framework for collaborative computational research',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apua Paquola',
     author_email='apuapaquola@gmail.com',
-    url='https://github.com/apuapaquola/rf',
+    url='https://github.com/ricardo.jacomini/rf',
     license='GPLv3',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha'
