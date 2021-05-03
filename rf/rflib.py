@@ -97,10 +97,10 @@ def get_config_parameter(key):
     defaults = {
         'always_use_docker': False,
         'default_docker_run_command':
-            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
+            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{container-image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' ''',
         'default_singularity_run_command':
-            '''singularity shell --bind '{mount}' '{singularity_image}' ''' +
+            '''singularity shell --bind '{mount}' '{container-image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
     
@@ -120,7 +120,7 @@ def get_config_parameter(key):
         return None
 
 
-def driver_script_command_container(node, container_parameters,storage):
+def driver_script_command_container(node, container_parameters, storage):
     """If the file node/_h/container_run exists, then a command calling it is generated. Otherwise,
     a standard container run call is generated using container parameters.
 
@@ -142,9 +142,9 @@ def driver_script_command_container(node, container_parameters,storage):
             os.access(node + '/_h/container_run', os.X_OK):
         return '../_h/container_run'
     elif '.sif' in container_parameters:
-        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, singularity_image=container_parameters)
+        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, container-image=container_parameters)
     else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, docker_image=container_parameters, mount=storage)
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, container-image=container_parameters, mount=storage)
         	
 
 
