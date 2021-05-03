@@ -100,7 +100,7 @@ def get_config_parameter(key):
             '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' ''',
         'default_singularity_run_command':
-            '''singularity exec --bind '{mount}' '{container_image}' && ''' +
+            '''singularity exec --bind '{mount}' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
     
