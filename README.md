@@ -1,4 +1,4 @@
-## rf - A framework for collaborative data analysis
+# rf - A framework for collaborative data analysis
 
 ```
 pip install git+git://github.com/ricardojacomini/rf.git
@@ -11,6 +11,14 @@ pip install git+git://github.com/ricardojacomini/rf.git
 ## Overview
 
 We propose a simple and intuitive way to organize computational analyses using a directory structure constructed according to 3 simple principles.
+
+**1** : Use of a directory structure to represent dependencies between analysis steps.
+
+**2** : Separation of user-generated data from program-generated data.
+
+**3** : Use of driver scripts.
+
+These 3 principles are desirable to help keep analysis organized, reproducible and easier to understand.
 
 Consider the following directory structure:
 
@@ -25,23 +33,19 @@ Consider the following directory structure:
             ├── _h
             └── _m
 
-
 In this tree, nodeA has two children: nodeB and nodeC.
 
 We can think of these nodes as steps in a computational pipeline, in which nodeB and nodeC depend on the results of computation performed in nodeA.
 
-# **This is principle 1**: use of a directory structure to represent dependencies between analysis steps.
-
+### Principle 1
 Each node has two special subdirectories: `_h` and `_m` with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory `_h`. For this reason, we call `_h` the "human" directory. Similarly, we use directory `_m` to store the results of computation of this analysis step. For this reason, we call `_m` the "machine" directory.
 
-# **This is principle 2**: separation of user-generated data from program-generated data.
-
+### Principle 2
 In the "human" directory we put a file named `run`. `run` is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
 
-# **This is principle 3**: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
+### Principle 3
+[doi: 10.1371/journal.pcbi.1000424]
 
-
-These 3 principles are desirable to help keep analysis organized, reproducible and easier to understand.
 
 A directory structure is a intuitive way to represent data dependencies. Let's say we are at some `_m` directory looking at output files, and we wonder how these files were generated. A pwd command will display the full path to that directory, which has a sequence of names of analysis steps involved in the generation of these files.
 
