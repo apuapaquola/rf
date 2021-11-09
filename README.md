@@ -41,7 +41,7 @@ We can think of these nodes as steps in a computational pipeline, in which nodeB
 Each node has two special subdirectories: `_h` and `_m` with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory `_h`. For this reason, we call `_h` the "human" directory. Similarly, we use directory `_m` to store the results of computation of this analysis step. For this reason, we call `_m` the "machine" directory.
 
 ### Principle 2
-In the "human" directory we put a file named `run`. `run` is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
+In the "human" directory we put a file named `run`. The `run` file is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
 
 ### Principle 3
 [doi: 10.1371/journal.pcbi.1000424]
