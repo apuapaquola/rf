@@ -30,15 +30,15 @@ In this tree, nodeA has two children: nodeB and nodeC.
 
 We can think of these nodes as steps in a computational pipeline, in which nodeB and nodeC depend on the results of computation performed in nodeA.
 
-This is principle 1: use of a directory structure to represent dependencies between analysis steps.
+**This is principle 1**: use of a directory structure to represent dependencies between analysis steps.
 
 Each node has two special subdirectories: `_h` and `_m` with distinct purposes. We put documentation, code and other human-generated data that describe this analysis step in directory `_h`. For this reason, we call `_h` the "human" directory. Similarly, we use directory `_m` to store the results of computation of this analysis step. For this reason, we call `_m` the "machine" directory.
 
-This is principle 2: separation of user-generated data from program-generated data.
+**This is principle 2**: separation of user-generated data from program-generated data.
 
 In the "human" directory we put a file named `run`. `run` is a script that is supposed to be run without arguments from the "machine" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_m`.
 
-This is principle 3: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
+**This is principle 3**: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
 
 
 These 3 principles are desirable to help keep analysis organized, reproducible and easier to understand.
