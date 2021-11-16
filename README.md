@@ -1,12 +1,8 @@
 # Reproducibility Framework (RF) for collaborative data analysis
 
 ```
-pip install git+git://github.com/ricardojacomini/rf.git
+pip install git+git://github.com/ricardojacomini/rf.git --user
 ```
-
-## Preprint 
-
- http://biorxiv.org/content/early/2015/12/09/033654
  
 ## Overview
 
@@ -84,3 +80,6 @@ Please do!
 
 GNU GPLv3
  
+## Preprint 
+
+ http://biorxiv.org/content/early/2015/12/09/033654
