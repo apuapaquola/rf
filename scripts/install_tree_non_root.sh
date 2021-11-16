@@ -1,5 +1,8 @@
 # Script to install the tree command for non-root users.
-# To copy this script locally and type:
+# Download the script locally
+# curl https://raw.githubusercontent.com/ricardojacomini/rf/master/scripts/install_tree_non_root.sh --output install_tree_non_root.sh
+#
+# Install
 # $ sh install_tree_non_root.sh
 
 cd $HOME
