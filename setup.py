@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='rf',
-    version='0.1.0.dev1',
-    description='A framework for collaborative computational research',
+    version='0.2.0.dev1',
+    description='A Reproducibility Framework (RF) for collaborative computational research',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apua Paquola',
     author_email='apuapaquola@gmail.com',
