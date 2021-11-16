@@ -1,4 +1,4 @@
-# rf - A framework for collaborative data analysis
+# Reproducibility Framework (RF) for collaborative data analysis
 
 ```
 pip install git+git://github.com/ricardojacomini/rf.git
@@ -46,13 +46,11 @@ In the "human" directory we put a file named `run`. The `run` file is a script t
 ### Principle 3
 [doi: 10.1371/journal.pcbi.1000424]
 
-
 A directory structure is a intuitive way to represent data dependencies. Let's say we are at some `_m` directory looking at output files, and we wonder how these files were generated. A pwd command will display the full path to that directory, which has a sequence of names of analysis steps involved in the generation of these files.
 
 Separation of computer-generated data from human-generated data is also nice. It is a way to make sure that users don't edit output files. It is also useful to know which files are program-generated, so we know which files are OK to delete because they can be computed again.
 
 Running driver scripts without arguments is a way to make sure computation doesn't depend on manually specified parameters, which are easy to forget.
-
 
 
 ## Version control
