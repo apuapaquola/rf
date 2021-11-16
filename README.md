@@ -1,7 +1,7 @@
 # Reproducibility Framework (RF) for collaborative data analysis
 
 ```
-pip install git+git://github.com/ricardojacomini/rf.git --user
+pip install git+git://github.com/ricardojacomini/rf.git --upgrade --user
 ```
  
 ## Overview
