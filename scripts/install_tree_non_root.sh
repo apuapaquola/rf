@@ -1,5 +1,5 @@
-# Script to install the tree command local as non-root.
-# To install it, copy this script locally and type:
+# Script to install the tree command for non-root users.
+# To copy this script locally and type:
 # $ sh install_tree_non_root.sh
 
 cd $HOME
