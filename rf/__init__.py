@@ -48,7 +48,7 @@ def nodes(parent):
         if x not in ['_h', '_m', '.git']:
             child = os.path.join(parent, x)
             if os.path.isdir(child):
-                yield nodes(child)
+                yield from nodes(child)
 
 
 def run(args):
