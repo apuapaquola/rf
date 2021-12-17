@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #!/usr/bin/env python
 """ rf - A Reproducibility Framework (RF) for collaborative data analysis
 
