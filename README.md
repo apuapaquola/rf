@@ -81,7 +81,7 @@ The version control is not covered in this tutorial, see the preprint for more d
 
 ## Tutorials
 
-Tutorial 1.1: Runs driver scripts to generate the _m directories (results/contents)
+**Tutorial 1.1**: Runs driver scripts to generate the _m directories (results/contents)
 
 Let's create a directory structure called repro to put this Reproducibility Framework (rf) into practice. 
 
@@ -104,7 +104,7 @@ $ rf status
 $ ls _m/*
 _m/date.txt  _m/nohup.out  _m/SUCCESS
 ```
-Tutorial 1.2: Runs driver scripts to generate the _m directories (results/contents) via containers
+**Tutorial 1.2**: Runs driver scripts to generate the _m directories (results/contents) via containers
 ```
 $ mkdir bedtools/_h -p
 $ cd bedtools/     
