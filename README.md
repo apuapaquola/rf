@@ -26,34 +26,34 @@ Follow the preprint to install the rf on Linux. Make sure do you have a python 3
 
 Then, run rf --help and rf run --help to verify the installation.
 ```
-$ pip3 install git+git://github.com/ricardojacomini/rf.git --upgrade --user
-$ rf --help
-$ rf run --help
+1.  $ pip3 install git+git://github.com/ricardojacomini/rf.git --upgrade --user
+2.  $ rf --help
+3.  $ rf run --help
 ```
 **Step 2**: Install the tree command for non-root users
 
 To support the framework functionalities, it is necessary to install the tree command on GNU/Linux or macOS (brew install tree). If you do not have permission to install it on the system (root), you must install the tree command as a non-root user.
 
 ```
-$ curl -OL https://raw.githubusercontent.com/ricardojacomini/rf/master/scripts/install_tree_non_root.sh
-$ rm install_tree_non_root.sh (optional)
-$ rf status
-$ rf status -p
+1.  $ curl -OL https://raw.githubusercontent.com/ricardojacomini/rf/master/scripts/install_tree_non_root.sh
+2.  $ rm install_tree_non_root.sh (optional)
+3.  $ rf status
+4.  $ rf status -p
 ```
 
 Consider the following directory structure:
 
 ```
-$ tree
-├── nodeA
-│   ├── _h         (human-generated data)
-│   ├── _m         (machine-generated data)
-│   └── nodeB
-│       ├── _h
-│       ├── _m
-│       └── nodeC
-│           ├── _h
-│           └── _m
+1.  $ tree
+    ├── nodeA
+    │   ├── _h         (human-generated data)
+    │   ├── _m         (machine-generated data)
+    │   └── nodeB
+    │       ├── _h
+    │       ├── _m
+    │       └── nodeC
+    │           ├── _h
+    │           └── _m
 ```
 
 **Principle 1**
@@ -89,45 +89,45 @@ Let’s create a simple run file to learn how rf works. Then, change the permiss
 
 Note: Since rf was designed to work collaboratively and have version control, it is necessary to create a new Git repository local (row # 9). 
 ```
-$ mkdir tutorials/repro/_h -p
-$ cd tutorials/repro/
-$ echo "date > date.txt" > _h/run
-$ rf status                        
-.  no run script         
-$ chmod +x _h/run                 
-$ rf status
-.   ready to run
-$ git init . 
-$ rf run .          # use: ( nohup rf run . & ) to run the rf immune to hangups
-$ rf status
-.           done
-$ ls _m/*
-_m/date.txt  _m/nohup.out  _m/SUCCESS
+1.  $ mkdir tutorials/repro/_h -p
+2.  $ cd tutorials/repro/
+3.  $ echo "date > date.txt" > _h/run
+4.  $ rf status                        
+5.  .  no run script         
+6.  $ chmod +x _h/run                 
+7.  $ rf status
+8.  .   ready to run
+9.  $ git init . 
+10. $ rf run .          # use: ( nohup rf run . & ) to 11. run the rf immune to hangups
+12. $ rf status
+13. .           done
+14. $ ls _m/*
+15. _m/date.txt  _m/nohup.out  _m/SUCCESS
 ```
 **Tutorial 1.2**: Runs driver scripts to generate the _m directories (results/contents) via containers
 ```
-$ mkdir bedtools/_h -p
-$ cd bedtools/     
+1.  $ mkdir bedtools/_h -p
+2.  $ cd bedtools/     
 ```
 Let's fire up our text editor (vim/nano/emacs) and type in our bedtools1 script as follows:
 ```
-$ vi _h/run
-
-#!/bin/bash
-set -o errexit -euo pipefail
-
-bedtools genomecov -i ../_h/exons.bed -g ../_h/genome.txt -bg > out.tsv  
-
-$ chmod +x _h/run 
+1.  $ vi _h/run
+2.  
+3.  #!/bin/bash
+4.  set -o errexit -euo pipefail
+5.  
+6.  bedtools genomecov -i ../_h/exons.bed -g ../_h/genome.txt -bg > out.tsv  
+7.  
+8.  $ chmod +x _h/run 
 ```
 If you return a level (repro directory) and check the execution status of this pipeline (rf status), you can see that step 1 (repro) is done, and step 2 (bedtools) is ready to run. It is important to mind will be run the bedtoots via container (singularity). 
 
 Note: It is important to note our purpose here is to use a container to isolate programs and not develop or share scripts within the container images. Keep it as simple as possible, and all scripts will be performed via the rf command, as will be shown below.
 ```
-$ cd ..
-$ rf status
-.                      done      (step 1 of the pipeline)
-└── bedtools   ready to run      (step 2 of the pipeline)
+1.  $ cd ..
+2.  $ rf status
+3.  .                      done      (step 1 of the pipeline)
+4.  └── bedtools   ready to run      (step 2 of the pipeline)
 ```
 
 ## Status
