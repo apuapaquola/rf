@@ -26,7 +26,7 @@ Follow the preprint to install the rf on Linux. Make sure do you have a python 3
 
 Then, run rf --help and rf run --help to verify the installation.
 ```
-1.  $ pip3 install git+git://github.com/ricardojacomini/rf.git --upgrade --user
+1.  $ pip3 install git+git://github.com/apuapaquola/rf.git --upgrade --user
 2.  $ rf --help
 3.  $ rf run --help
 ```
