@@ -50,6 +50,12 @@ def nodes(parent):
             if os.path.isdir(child):
                 yield from nodes(child)
 
+def sbatch(args):
+    """ Runs driver scripts throughout the tree
+    :param args:
+    :return:
+    """
+    rflib.sbatch(args)
 
 def run(args):
     """ Runs driver scripts throughout the tree
@@ -187,11 +193,17 @@ def main():
     parser_run.add_argument('-n', '--dry-run', action='store_true')
     parser_run.add_argument('-v', '--verbose', action='store_true')
     parser_run.add_argument('-r', '--recursive', action='store_true')
-    parser_run.add_argument('-s','--sbatch', help='Submits a batch script to Slurm')
     parser_run.add_argument('--container_image', help='Singularity (.sif) or Docker Container')
     parser_run.add_argument('--volume', help='Bind mount a volume')
     parser_run.add_argument('node')
     parser_run.set_defaults(func=run)
+
+    parser_drop = subparsers.add_parser('sbatch', help='Submits a batch script to Slurm')
+    parser_drop.add_argument('-r', '--recursive', action='store_true')
+    parser_drop.add_argument('-f', '--force', action='store_true')
+    parser_drop.add_argument('node')
+    parser_run.set_defaults(func=sbatch)
+
 
     parser_drop = subparsers.add_parser('drop', help='drop machine directory')
     parser_drop.add_argument('-r', '--recursive', action='store_true')

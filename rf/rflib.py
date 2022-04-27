@@ -259,13 +259,25 @@ def run_make(makefile_string):
     p.stdin.close()
     p.wait()
 
+def sbatch(args):
+    """Implements rf sbatch arguments from command line"""
+
+    if args.sbatch:
+        dscf = driver_script_command_slurm
+
+    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
+
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
+
+    if args.verbose:
+        print(mf)
+    if not args.dry_run:
+        run_make(mf)
 
 def run(args):
     """Implements rf run arguments from command line"""
 
-    if args.sbatch:
-        dscf = driver_script_command_slurm
-    elif args.container_image is not None or get_config_parameter('always_use_container'):
+    if args.container_image is not None or get_config_parameter('always_use_container'):
         dscf = functools.partial(driver_script_command_container, container_image=args.container_image, volume=args.volume)
     else:
         dscf = driver_script_command_native
