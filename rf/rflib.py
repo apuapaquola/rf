@@ -81,6 +81,10 @@ def driver_script_command_native(node):
     assert (os.path.isdir(node))
     return '../_h/run > nohup.out 2>&1'
 
+def driver_script_command_slurm(node):
+    assert (os.path.isdir(node))
+    return '''bash -c 'cd "{node}/_m" && sbatch ../_h/run > nohup.out 2>&1' '''
+
 
 def get_basedir():
     """Gets the root of the analysis tree. The one that contains the .git directory"""
@@ -103,7 +107,7 @@ def get_config_parameter(key):
             '''singularity exec --bind '{bind}' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
-    
+
     config = {}
 
     try:
@@ -136,7 +140,7 @@ def driver_script_command_container(node, container_image, volume):
 
     """
     assert (os.path.isdir(node))
-         	
+
     if node is not None and \
             os.path.isdir(node + '/_h') and \
             os.access(node + '/_h/container_run', os.X_OK):
@@ -145,7 +149,7 @@ def driver_script_command_container(node, container_image, volume):
         return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, bind=volume, container_image=container_image )
     else:
         return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, bind=volume, container_image=container_image)
-        	
+
 
 
 def success_file(node):
@@ -259,13 +263,15 @@ def run_make(makefile_string):
 def run(args):
     """Implements rf run arguments from command line"""
 
-    if args.container_image is not None or get_config_parameter('always_use_container'):
+    if args.sbatch:
+        dscf = driver_script_command_slurm
+    elif args.container_image is not None or get_config_parameter('always_use_container'):
         dscf = functools.partial(driver_script_command_container, container_image=args.container_image, volume=args.volume)
     else:
         dscf = driver_script_command_native
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
-    
+
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
 
     if args.verbose:
