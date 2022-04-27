@@ -82,6 +82,7 @@ def driver_script_command_native(node):
     return '../_h/run > nohup.out 2>&1'
 
 def driver_script_command_slurm(node,args):
+    print("Node : " + node)
     print("Args : " + args)
 
     assert (os.path.isdir(node))
