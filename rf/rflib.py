@@ -176,15 +176,15 @@ def rule_string(dependencies, node, driver_script_command_function):
     command = driver_script_command_function(node)
 
     return '''.ONESHELL:
-%s: %s
-\techo -n "Start %s: "; date --rfc-3339=seconds
-\tmkdir %s/_m
-\tcd %s/_m
-\t%s
-\ttouch SUCCESS
-\techo -n "End %s: "; date --rfc-3339=seconds
+    %s: %s
+    \techo -n "Start %s: "; date --rfc-3339=seconds
+    \tmkdir %s/_m
+    \tcd %s/_m
+    \t%s
+    \ttouch SUCCESS
+    \techo -n "End %s: "; date --rfc-3339=seconds
 
-''' % (success_file(node), dep_string, node, node, node, command, node)
+    ''' % (success_file(node), dep_string, node, node, node, command, node)
 
 
 def dependency_links(node):
@@ -275,6 +275,7 @@ def sbatch(args):
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
 
     if args.verbose:
+        print(dscf)
         print(mf)
     if not args.options:
         run_make(mf)
