@@ -265,10 +265,10 @@ def run_make(makefile_string):
 def sbatch(args):
     """Implements rf sbatch arguments from command line"""
 
-    if args.options:
-        dscf = driver_script_command_slurm(args.node,args.options)
+    if args.options is not None:
+        dscf = functools.partial(driver_script_command_slurm, args)
     else:
-        dscf = driver_script_command_slurm(args.node,None)
+        dscf = driver_script_command_slurm
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
