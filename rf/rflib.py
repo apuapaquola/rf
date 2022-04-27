@@ -277,7 +277,7 @@ def sbatch(args):
 
     if args.verbose:
         print(mf)
-    if not args.dry_run:
+    if not args.options:
         run_make(mf)
 
 def run(args):
