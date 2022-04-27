@@ -265,9 +265,9 @@ def sbatch(args):
     """Implements rf sbatch arguments from command line"""
 
     if args.options is None:
-        dscf = driver_script_command_slurm
+        dscf = driver_script_command_slurm(os.path.realpath(args.node), None)
     else:
-        dscf = functools.partial(driver_script_command_slurm, args)
+        dscf = driver_script_command_slurm(os.path.realpath(args.node), args)
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
