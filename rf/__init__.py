@@ -187,7 +187,7 @@ def main():
     parser_run.add_argument('-n', '--dry-run', action='store_true')
     parser_run.add_argument('-v', '--verbose', action='store_true')
     parser_run.add_argument('-r', '--recursive', action='store_true')
-    parser_run.add_argument('-s','--sbatch' help='Submits a batch script to Slurm')
+    parser_run.add_argument('-s','--sbatch', help='Submits a batch script to Slurm')
     parser_run.add_argument('--container_image', help='Singularity (.sif) or Docker Container')
     parser_run.add_argument('--volume', help='Bind mount a volume')
     parser_run.add_argument('node')
