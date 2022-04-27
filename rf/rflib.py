@@ -82,8 +82,13 @@ def driver_script_command_native(node):
     return '../_h/run > nohup.out 2>&1'
 
 def driver_script_command_slurm(node,args):
+
+    print("1: " + node)
+
+    print("2: " + args)
+
     assert (os.path.isdir(node))
-    if args is None:
+    if args.options is None:
        return '''sbatch ../_h/run > nohup.out 2>&1' '''
     else:
        return '''sbatch "{args}" ../_h/run > nohup.out 2>&1' '''
