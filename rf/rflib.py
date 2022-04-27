@@ -80,9 +80,9 @@ def driver_script_command_native(node):
     assert (os.path.isdir(node))
     return '../_h/run > nohup.out 2>&1'
 
-def driver_script_command_slurm(args):
+def driver_script_command_slurm(node):
 
-    assert (os.path.isdir(os.path.realpath(node)))
+    assert (os.path.isdir(node))
     return '''sbatch ../_h/run > nohup.out 2>&1' '''
 
 def get_basedir():
@@ -269,8 +269,8 @@ def sbatch(args):
 
     if args.verbose:
         print(mf)
-    if not args.dry_run:
-        run_make(mf)
+
+    run_make(mf)
 
 def run(args):
     """Implements rf run arguments from command line"""
