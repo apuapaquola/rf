@@ -270,7 +270,7 @@ def sbatch(args):
     if args.verbose:
         print(mf)
     if not args.dry_run:
-       run_make(mf)
+        run_make(mf)
 
 def run(args):
     """Implements rf run arguments from command line"""
@@ -286,3 +286,4 @@ def run(args):
     if args.verbose:
         print(mf)
     if not args.dry_run:
+        run_make(mf)
