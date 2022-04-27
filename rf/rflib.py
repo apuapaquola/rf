@@ -276,7 +276,7 @@ def sbatch(args):
             subprocess.check_call(dscf)
 
     try:
-        subprocess.check_call(['mkdir', {args.node}'/_m'])
+        subprocess.check_call(['mkdir', {args.node}+'/_m'])
         subprocess.check_call(dscf)
     except subprocess.CalledProcessError:
         raise
