@@ -269,16 +269,15 @@ def sbatch(args):
         dscf = driver_script_command_slurm(args.node,args.options)
     else:
         dscf = driver_script_command_slurm(args.node,None)
-    print(dscf)
+
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
-    print(rule_string_function)
+
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
-    print(mf)
+
     if args.verbose:
         print(mf)
     if not args.options:
         run_make(mf)
-
 
 def run(args):
     """Implements rf run arguments from command line"""
