@@ -28,7 +28,6 @@ __version__ = '2.0.0'
 __date__ = "April / 26 / 2021"
 __status__ = "Development"
 
-
 def is_ready_to_run(node):
     """Tests if a node is ready to run.
 
@@ -274,9 +273,8 @@ def sbatch(args):
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
 
     if args.verbose:
-        print(dscf)
         print(mf)
-    if not args.options:
+    if not args.dry_run:
         run_make(mf)
 
 def run(args):
