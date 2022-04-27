@@ -82,11 +82,6 @@ def driver_script_command_native(node):
 
 def driver_script_command_slurm(args):
 
-    if args.options is not None:
-       print("Args : " + args.options)
-
-    print("Node : " + args.node)
-
     assert (os.path.isdir(os.path.realpath(node)))
     return '''sbatch ../_h/run > nohup.out 2>&1' '''
 
@@ -177,15 +172,15 @@ def rule_string(dependencies, node, driver_script_command_function):
     command = driver_script_command_function(node)
 
     return '''.ONESHELL:
-    %s: %s
-    \techo -n "Start %s: "; date --rfc-3339=seconds
-    \tmkdir %s/_m
-    \tcd %s/_m
-    \t%s
-    \ttouch SUCCESS
-    \techo -n "End %s: "; date --rfc-3339=seconds
+%s: %s
+\techo -n "Start %s: "; date --rfc-3339=seconds
+\tmkdir %s/_m
+\tcd %s/_m
+\t%s
+\ttouch SUCCESS
+\techo -n "End %s: "; date --rfc-3339=seconds
 
-    ''' % (success_file(node), dep_string, node, node, node, command, node)
+''' % (success_file(node), dep_string, node, node, node, command, node)
 
 
 def dependency_links(node):
@@ -266,7 +261,7 @@ def run_make(makefile_string):
 def sbatch(args):
     """Implements rf sbatch arguments from command line"""
 
-    dscf = driver_script_command_slurm(args)
+    dscf = driver_script_command_slurm
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
