@@ -81,14 +81,14 @@ def driver_script_command_native(node):
     assert (os.path.isdir(node))
     return '../_h/run > nohup.out 2>&1'
 
-def driver_script_command_slurm(node,args):
+def driver_script_command_slurm(args):
 
-    if args is not None:
-       print("Args : " + args)
+    if args.options is not None:
+       print("Args : " + args.options)
 
-    print("Node : " + node)
+    print("Node : " + args.node)
 
-    assert (os.path.isdir(node))
+    assert (os.path.isdir(os.path.realpath(node)))
     return '''sbatch ../_h/run > nohup.out 2>&1' '''
 
 def get_basedir():
@@ -267,10 +267,7 @@ def run_make(makefile_string):
 def sbatch(args):
     """Implements rf sbatch arguments from command line"""
 
-    if args.options is None:
-        dscf = driver_script_command_slurm(os.path.realpath(args.node), None)
-    else:
-        dscf = driver_script_command_slurm(os.path.realpath(args.node), args)
+    dscf = driver_script_command_slurm(args)
 
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
