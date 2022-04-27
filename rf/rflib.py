@@ -273,7 +273,7 @@ def sbatch(args):
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
-
+    print(mf)
     if args.verbose:
         print(mf)
     if not args.options:
