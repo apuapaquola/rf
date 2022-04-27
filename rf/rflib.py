@@ -84,10 +84,9 @@ def driver_script_command_native(node):
 def driver_script_command_slurm(node,args):
     assert (os.path.isdir(node))
     if args is None:
-       return '''bash -c 'mkdir {node}/_m && cd "{node}/_m" && sbatch ../_h/run > nohup.out 2>&1' '''
+       return '''bash -c 'cd "{node}/_m" && sbatch ../_h/run > nohup.out 2>&1' '''
     else:
-       return '''bash -c 'mkdir {node}/_m && cd "{node}/_m" && sbatch "{args}" ../_h/run > nohup.out 2>&1' '''
-
+       return '''bash -c 'cd "{node}/_m" && sbatch "{args}" ../_h/run > nohup.out 2>&1' '''
 
 
 def get_basedir():
@@ -271,14 +270,16 @@ def sbatch(args):
     else:
         dscf = driver_script_command_slurm(args.node,None)
 
-    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
-
-    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
-
     if args.verbose:
         print(mf)
     if not args.options:
-        run_make(mf)
+            subprocess.check_call(dscf)
+
+    try:
+        subprocess.check_call(['mkdir', {args.node}'/_m'])
+        subprocess.check_call(dscf)
+    except subprocess.CalledProcessError:
+        raise
 
 def run(args):
     """Implements rf run arguments from command line"""
