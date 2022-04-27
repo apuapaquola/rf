@@ -270,16 +270,15 @@ def sbatch(args):
     else:
         dscf = driver_script_command_slurm(args.node,None)
 
+    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
+
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
+
     if args.verbose:
         print(mf)
-    if not args.options:
-            subprocess.check_call(dscf)
+    if not args.dry_run:
+        run_make(mf)
 
-    try:
-        subprocess.check_call(['mkdir', {args.node}+'/_m'])
-        subprocess.check_call(dscf)
-    except subprocess.CalledProcessError:
-        raise
 
 def run(args):
     """Implements rf run arguments from command line"""
@@ -288,7 +287,6 @@ def run(args):
         dscf = functools.partial(driver_script_command_container, container_image=args.container_image, volume=args.volume)
     else:
         dscf = driver_script_command_native
-
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
