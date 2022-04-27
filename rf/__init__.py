@@ -200,6 +200,7 @@ def main():
 
     parser_sbatch = subparsers.add_parser('sbatch', help='Submits a batch script to Slurm')
     parser_sbatch.add_argument('-o', '--options', action='store_true', help='sbatch arguments')
+    parser_sbatch.add_argument('-n', '--dry-run', action='store_true')
     parser_sbatch.add_argument('-v', '--verbose', action='store_true')
     parser_sbatch.add_argument('-r', '--recursive', action='store_true')
     parser_sbatch.add_argument('node')
