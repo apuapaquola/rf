@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 #!/usr/bin/env python
-""" rf - A framework for collaborative data analysis
+""" rf - A Reproducibility Framework (RF) for collaborative data analysis
 
     Copyright (C) 2015 Apuã Paquola <apuapaquola@gmail.com>
 
@@ -25,7 +27,11 @@ import re
 
 from . import rflib
 
-__author__ = 'Apuã Paquola'
+__author__ = 'Apuã Paquola, Ricardo S jacomini'
+__email__ = "apuapaquola@gmail.com"
+__version__ = '0.2.1'
+__date__ = "April / 26 / 2022"
+__status__ = "Development"
 
 
 def nodes(parent):
@@ -44,6 +50,12 @@ def nodes(parent):
             if os.path.isdir(child):
                 yield from nodes(child)
 
+def sbatch(args):
+    """ Runs slurm scripts throughout the tree
+    :param args:
+    :return:
+    """
+    rflib.sbatch(args)
 
 def run(args):
     """ Runs driver scripts throughout the tree
@@ -181,9 +193,18 @@ def main():
     parser_run.add_argument('-n', '--dry-run', action='store_true')
     parser_run.add_argument('-v', '--verbose', action='store_true')
     parser_run.add_argument('-r', '--recursive', action='store_true')
-    parser_run.add_argument('-d', '--docker-image')
+    parser_run.add_argument('--container_image', help='Singularity (.sif) or Docker Container')
+    parser_run.add_argument('--volume', help='Bind mount a volume')
     parser_run.add_argument('node')
     parser_run.set_defaults(func=run)
+
+    parser_sbatch = subparsers.add_parser('sbatch', help='Submits a batch script to Slurm')
+    parser_sbatch.add_argument('-o', '--options', action='store_true', help='sbatch arguments')
+    parser_sbatch.add_argument('-n', '--dry-run', action='store_true')
+    parser_sbatch.add_argument('-v', '--verbose', action='store_true')
+    parser_sbatch.add_argument('-r', '--recursive', action='store_true')
+    parser_sbatch.add_argument('node')
+    parser_sbatch.set_defaults(func=sbatch)
 
     parser_drop = subparsers.add_parser('drop', help='drop machine directory')
     parser_drop.add_argument('-r', '--recursive', action='store_true')

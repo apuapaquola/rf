@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" rf - A framework for collaborative data analysis
+""" rf - A Reproducibility Framework (RF) for collaborative data analysis
 
     Copyright (C) 2015 Apuã Paquola <apuapaquola@gmail.com>
 
@@ -22,8 +22,11 @@ import subprocess
 import functools
 import yaml
 
-__author__ = 'Apuã Paquola'
-
+__author__ = 'Apuã Paquola, Ricardo S jacomini'
+__email__ = "apuapaquola@gmail.com"
+__version__ = '2.0.0'
+__date__ = "April / 26 / 2021"
+__status__ = "Development"
 
 def is_ready_to_run(node):
     """Tests if a node is ready to run.
@@ -77,6 +80,10 @@ def driver_script_command_native(node):
     assert (os.path.isdir(node))
     return '../_h/run > nohup.out 2>&1'
 
+def driver_script_command_slurm(node):
+
+    assert (os.path.isdir(node))
+    return 'sbatch ../_h/run > nohup.out 2>&1'
 
 def get_basedir():
     """Gets the root of the analysis tree. The one that contains the .git directory"""
@@ -93,7 +100,10 @@ def get_config_parameter(key):
     defaults = {
         'always_use_docker': False,
         'default_docker_run_command':
-            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
+            '''docker run --volume '{bind}' '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{container_image}' ''' +
+            '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' ''',
+        'default_singularity_run_command':
+            '''singularity exec --bind '{bind}' '{container_image}' ''' +
             '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
     }
 
@@ -113,30 +123,32 @@ def get_config_parameter(key):
         return None
 
 
-def driver_script_command_docker(node, docker_image):
-    """If the file node/_h/docker_run exists, then a command calling it is generated. Otherwise,
-    a standard docker run call is generated using docker_image.
+def driver_script_command_container(node, container_image, volume):
+    """If the file node/_h/container_run exists, then a command calling it is generated. Otherwise,
+    a standard container run call is generated using container parameters.
 
-    The standard docker run call mounts the base directory (where .git is located) as read_only and
+    The standard container run call mounts the base directory (where .git is located) as read_only and
     current _m directory as read-write.
 
     Args:
         node: a node of the tree
-        docker_image: name of docker image to use
+        container: parameters of container
 
     Returns:
         A driver script calling command
 
     """
     assert (os.path.isdir(node))
+
     if node is not None and \
             os.path.isdir(node + '/_h') and \
-            os.access(node + '/_h/docker_run', os.X_OK):
-        return '../_h/docker_run'
-
+            os.access(node + '/_h/container_run', os.X_OK):
+        return '../_h/container_run'
+    elif '.sif' in container_image:
+        return get_config_parameter('default_singularity_run_command').format(basedir=get_basedir(), node=node, bind=volume, container_image=container_image )
     else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(),
-                                                                         node=node, docker_image=docker_image)
+        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(), node=node, bind=volume, container_image=container_image)
+
 
 
 def success_file(node):
@@ -161,7 +173,6 @@ def rule_string(dependencies, node, driver_script_command_function):
 
     return '''.ONESHELL:
 %s: %s
-\tset -o errexit -o pipefail
 \techo -n "Start %s: "; date --rfc-3339=seconds
 \tmkdir %s/_m
 \tcd %s/_m
@@ -247,16 +258,27 @@ def run_make(makefile_string):
     p.stdin.close()
     p.wait()
 
+def sbatch(args):
+    """Implements rf sbatch arguments from command line"""
+
+    dscf = driver_script_command_slurm
+
+    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
+
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
+
+    if args.verbose:
+        print(mf)
+    if not args.dry_run:
+        run_make(mf)
 
 def run(args):
-    """Implements rf run
-    arguments from command line"""
+    """Implements rf run arguments from command line"""
 
-    if args.docker_image is not None or get_config_parameter('always_use_docker'):
-        dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
+    if args.container_image is not None or get_config_parameter('always_use_container'):
+        dscf = functools.partial(driver_script_command_container, container_image=args.container_image, volume=args.volume)
     else:
         dscf = driver_script_command_native
-
     rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
 
     mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
