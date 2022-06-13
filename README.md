@@ -1,7 +1,7 @@
-## rf - A framework for collaborative data analysis
+## rf - A minimalist framework for reproducible computation
 
 ```
-pip install git+git://github.com/apuapaquola/rf.git
+pip install git+https://github.com/apuapaquola/rf.git
 ```
 
 ## Preprint 
@@ -67,7 +67,7 @@ This framework is in early stage of development, and contributors are very welco
 
 Current work includes, and some of these will be available soon:
 
-* Docker support.
+* Apptainer and Docker support.
 * More and better documentation.
 * Concrete examples of analysis, mostly focusing on Bioinformatics.
 * Use cases.
