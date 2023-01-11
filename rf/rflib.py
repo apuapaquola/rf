@@ -19,7 +19,6 @@
 
 import os
 import subprocess
-import functools
 import yaml
 
 __author__ = 'Apuã Paquola'
@@ -72,12 +71,27 @@ def find_dependencies(node, recursive):
                                                        (os.path.join(child, x) for x in os.listdir(child) if
                                                         x not in ['_h', '_m']))))
 
+            
 
-def driver_script_command_native(node):
+def driver_script_command(node):
+    """Generate a command to call the driver script. This command is
+    to be included in the makefile.
+
+    If ../_h/container.run is present, then the command uses
+    ../_h/container.run to call ../_h/run within the container.
+    Otherwise, the command calls ../_h/run called directly in the host.
+    """
+    
     assert (os.path.isdir(node))
-    return '../_h/run > nohup.out 2>&1'
 
+    if node is not None and \
+        os.path.isdir(node + '/_h') and \
+        os.access(node + '/_h/container.run', os.X_OK):
+        return '''../_h/container.run bash -c '../_h/run > nohup.out 2>&1' '''
+    else:
+        return '''../_h/run > nohup.out 2>&1'''
 
+    
 def get_basedir():
     """Gets the root of the analysis tree. The one that contains the .git directory"""
     return subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
@@ -113,43 +127,16 @@ def get_config_parameter(key):
         return None
 
 
-def driver_script_command_docker(node, docker_image):
-    """If the file node/_h/docker_run exists, then a command calling it is generated. Otherwise,
-    a standard docker run call is generated using docker_image.
-
-    The standard docker run call mounts the base directory (where .git is located) as read_only and
-    current _m directory as read-write.
-
-    Args:
-        node: a node of the tree
-        docker_image: name of docker image to use
-
-    Returns:
-        A driver script calling command
-
-    """
-    assert (os.path.isdir(node))
-    if node is not None and \
-            os.path.isdir(node + '/_h') and \
-            os.access(node + '/_h/docker_run', os.X_OK):
-        return '../_h/docker_run'
-
-    else:
-        return get_config_parameter('default_docker_run_command').format(basedir=get_basedir(),
-                                                                         node=node, docker_image=docker_image)
-
-
 def success_file(node):
     return node + '/_m/SUCCESS'
 
 
-def rule_string(dependencies, node, driver_script_command_function):
+def rule_string(dependencies, node):
     """Generates a makefile rule for a node given its dependencies.
 
     Args:
         dependencies (list of str): list of nodes
         node (str): a tree node
-        driver_script_command_function: function that generates a driver script call
 
     Returns:
         str: a makefile rule specifying how to generate the machine directory
@@ -157,7 +144,7 @@ def rule_string(dependencies, node, driver_script_command_function):
     """
     dep_string = ' '.join((success_file(x) for x in dependencies))
 
-    command = driver_script_command_function(node)
+    command = driver_script_command(node)
 
     return '''.ONESHELL:
 %s: %s
@@ -204,12 +191,11 @@ def belongs_to_tree(dirname, basedir):
     return (os.path.realpath(dirname) + '/').startswith(os.path.realpath(basedir) + '/')
 
 
-def makefile(dependency_iter, rule_string_function):
+def makefile(dependency_iter):
     """Generates a makefile given a list of tuples specifying nodes and dependencies.
 
     Args:
         dependency_iter (iterable on list of tuples): output of find_human_dirs
-        rule_string_function: a function that generates a rule string. See function rule_string.
 
     Returns:
         str: a makefile
@@ -220,7 +206,7 @@ def makefile(dependency_iter, rule_string_function):
 
     makefile_string = ''
     for (dependencies, child) in dependency_iter:
-        makefile_string += rule_string_function(dependencies, child)
+        makefile_string += rule_string(dependencies, child)
 
         for p in dependencies:
             dependency_set.add(p)
@@ -228,7 +214,7 @@ def makefile(dependency_iter, rule_string_function):
         child_set.add(child)
 
     for node in dependency_set.difference(child_set):
-        makefile_string += rule_string_function([], node)
+        makefile_string += rule_string([], node)
 
     makefile_string = 'all: ' + ' '.join(map(success_file, dependency_set.union(child_set))) + \
                       '\n\n' + makefile_string
@@ -252,15 +238,7 @@ def run(args):
     """Implements rf run
     arguments from command line"""
 
-    if args.docker_image is not None or get_config_parameter('always_use_docker'):
-        dscf = functools.partial(driver_script_command_docker, docker_image=args.docker_image)
-    else:
-        dscf = driver_script_command_native
-
-    rule_string_function = functools.partial(rule_string, driver_script_command_function=dscf)
-
-    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive), rule_string_function)
-
+    mf = makefile(find_dependencies(os.path.realpath(args.node), args.recursive))
     if args.verbose:
         print(mf)
     if not args.dry_run:

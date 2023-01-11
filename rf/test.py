@@ -51,7 +51,7 @@ class UnitTests(unittest.TestCase):
         subprocess.check_call(['git', 'init'])
         subprocess.check_call(['git', 'annex', 'init'])
 
-    def skel_test_run(self, docker_image):
+    def skel_test_run(self):
         """Create dummy analysis tree, run driver scripts and check output"""
         with tempfile.TemporaryDirectory() as tmpdirname:
             try:
@@ -61,7 +61,7 @@ class UnitTests(unittest.TestCase):
 
                 self.write_dummy_tree_and_init_git()
 
-                rflib.run(Namespace(node='.', recursive=True, verbose=True, dry_run=False, docker_image=docker_image))
+                rflib.run(Namespace(node='.', recursive=True, verbose=True, dry_run=False))
 
                 command = '''export LC_ALL=C; find . -name '*.txt' | sort | md5sum'''
                 o = subprocess.check_output(command, shell=True).decode()
@@ -76,5 +76,5 @@ class UnitTests(unittest.TestCase):
 
     def test_run_native(self):
         """Runs a test tree natively"""
-        self.skel_test_run(None)
+        self.skel_test_run()
 
