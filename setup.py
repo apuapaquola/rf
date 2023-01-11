@@ -5,7 +5,7 @@ setup(
     version='0.1.1',
     description='A minimalist framework for reproducible computation',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
-    author='Apua Paquola',
+    author='Apuã Paquola',
     author_email='apuapaquola@gmail.com',
     url='https://github.com/apuapaquola/rf',
     license='GPLv3',
