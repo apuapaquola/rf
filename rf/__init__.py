@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" rf - A framework for collaborative data analysis
+""" rf - A minimalist framework for reproducible computation
 
     Copyright (C) 2015 Apuã Paquola <apuapaquola@gmail.com>
 
