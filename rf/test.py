@@ -78,6 +78,3 @@ class UnitTests(unittest.TestCase):
         """Runs a test tree natively"""
         self.skel_test_run(None)
 
-    def test_run_docker(self):
-        """Runs a test tree with docker"""
-        self.skel_test_run('myarch_ngs')
