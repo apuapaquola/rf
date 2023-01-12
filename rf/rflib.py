@@ -19,7 +19,6 @@
 
 import os
 import subprocess
-import yaml
 
 __author__ = 'Apuã Paquola'
 
@@ -95,36 +94,6 @@ def driver_script_command(node):
 def get_basedir():
     """Gets the root of the analysis tree. The one that contains the .git directory"""
     return subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().rstrip()
-
-
-def get_config_parameter(key):
-    """Gets a configuration parameter from the config file or from the defaults defined here
-
-    :param key:
-    :return:
-    """
-
-    defaults = {
-        'always_use_docker': False,
-        'default_docker_run_command':
-            '''docker run -v '{basedir}':'{basedir}':ro -v '{node}/_m':'{node}/_m' '{docker_image}' ''' +
-            '''bash -c 'cd "{node}/_m" && ../_h/run > nohup.out 2>&1' '''
-    }
-
-    config = {}
-
-    try:
-        with open(get_basedir()+'/.cdaconfig', 'r') as f:
-            config = yaml.load(f)
-    except:
-        pass
-
-    if key in config:
-        return config[key]
-    elif key in defaults:
-        return defaults[key]
-    else:
-        return None
 
 
 def success_file(node):

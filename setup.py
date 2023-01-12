@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rf',
-    version='0.1.1',
+    version='0.2',
     description='A minimalist framework for reproducible computation',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apuã Paquola',
@@ -19,7 +19,6 @@ setup(
     keywords='bioinformatics reproducibility collaboration workflow git',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
-        'PyYAML'
     ],
     entry_points={
         'console_scripts': [
