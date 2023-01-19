@@ -86,7 +86,7 @@ def driver_script_command(node):
     if node is not None and \
         os.path.isdir(node + '/_h') and \
         os.access(node + '/_h/container.run', os.X_OK):
-        return '''../_h/container.run bash -c '../_h/run > nohup.out 2>&1' '''
+        return '''../_h/container.run ../_h/run > nohup.out 2>&1 '''
     else:
         return '''../_h/run > nohup.out 2>&1'''
 
