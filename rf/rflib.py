@@ -75,20 +75,10 @@ def find_dependencies(node, recursive):
 def driver_script_command(node):
     """Generate a command to call the driver script. This command is
     to be included in the makefile.
-
-    If ../_h/container.run is present, then the command uses
-    ../_h/container.run to call ../_h/run within the container.
-    Otherwise, the command calls ../_h/run called directly in the host.
     """
     
-    assert (os.path.isdir(node))
-
-    if node is not None and \
-        os.path.isdir(node + '/_h') and \
-        os.access(node + '/_h/container.run', os.X_OK):
-        return '''../_h/container.run ../_h/run > nohup.out 2>&1 '''
-    else:
-        return '''../_h/run > nohup.out 2>&1'''
+    assert (os.path.isdir(node) and os.path.isdir(node + '/_h') and os.access(node + '/_h/run', os.X_OK))
+    return '''../_h/run > nohup.out 2>&1'''
 
     
 def get_basedir():
