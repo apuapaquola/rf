@@ -39,7 +39,7 @@ def nodes(parent):
     assert os.path.isdir(parent)
     yield parent
     for x in os.listdir(parent):
-        if x not in ['_h', '_m', '.git']:
+        if x not in ['_c', '_o', '.git']:
             child = os.path.join(parent, x)
             if os.path.isdir(child):
                 yield from nodes(child)
@@ -54,18 +54,18 @@ def run(args):
 
 
 def drop(args):
-    """Deletes the contents of machine dirs _m
+    """Deletes the contents of output dirs _o
     """
     if args.recursive:
         nl = list(nodes(args.node))
     else:
         nl = [args.node]
 
-    dirs = [os.path.join(x, '_m') for x in nl]
+    dirs = [os.path.join(x, '_o') for x in nl]
 
     for x in dirs:
-        assert x.endswith('_m')
-        assert not x.endswith('_h')
+        assert x.endswith('_o')
+        assert not x.endswith('_c')
 
         if not os.path.isdir(x):
             continue
@@ -91,26 +91,26 @@ def clone(args):
 
 
 def commit(args):
-    """Commits human and machine dirs to git and git-annex
+    """Commits code and output dirs to git and git-annex
     """
     if args.recursive:
         nl = list(nodes(args.node))
     else:
         nl = [args.node]
 
-    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
-    human_dirs = [y for y in [os.path.join(x, '_h') for x in nl] if os.path.isdir(y)]
+    output_dirs = [y for y in [os.path.join(x, '_o') for x in nl] if os.path.isdir(y)]
+    code_dirs = [y for y in [os.path.join(x, '_c') for x in nl] if os.path.isdir(y)]
 
     try:
-        subprocess.check_call(['git', 'add'] + human_dirs)
-        subprocess.check_call(['git', 'annex', 'add'] + machine_dirs)
-        subprocess.check_call(['git', 'commit', '-m', args.message] + human_dirs + machine_dirs)
+        subprocess.check_call(['git', 'add'] + code_dirs)
+        subprocess.check_call(['git', 'annex', 'add'] + output_dirs)
+        subprocess.check_call(['git', 'commit', '-m', args.message] + code_dirs + output_dirs)
     except subprocess.CalledProcessError:
         raise
 
 
 def get(args):
-    """Fetches contents of machine directories from origin repository
+    """Fetches contents of output directories from origin repository
     :param args:
     :return:
     """
@@ -119,25 +119,25 @@ def get(args):
     else:
         nl = [args.node]
 
-    machine_dirs = [y for y in [os.path.join(x, '_m') for x in nl] if os.path.isdir(y)]
+    output_dirs = [y for y in [os.path.join(x, '_o') for x in nl] if os.path.isdir(y)]
 
     subprocess.check_call(['git', 'annex', 'sync', '--no-push'])
-    subprocess.check_call(['git', 'annex', 'get'] + machine_dirs)
+    subprocess.check_call(['git', 'annex', 'get'] + output_dirs)
 
 
 def node_status(node):
     """Returns node status"""
-    if not os.path.isdir(node + '/_h'):
-        return 'no _h'
-    elif os.path.exists(node + '/_h/run') and os.path.exists(node + '/_h/yield'):
+    if not os.path.isdir(node + '/_c'):
+        return 'no _c'
+    elif os.path.exists(node + '/_c/run') and os.path.exists(node + '/_c/yield'):
         return 'run/yield'
-    elif os.path.exists(node + '/_h/yield'):
+    elif os.path.exists(node + '/_c/yield'):
         return 'yield'
-    elif not (os.path.exists(node + '/_h/run') and os.access(node + '/_h/run', os.X_OK)):
+    elif not (os.path.exists(node + '/_c/run') and os.access(node + '/_c/run', os.X_OK)):
         return 'no run script'
-    elif not os.path.isdir(node + '/_m'):
+    elif not os.path.isdir(node + '/_o'):
         return 'ready to run'
-    elif os.path.exists(node + '/_m/SUCCESS'):
+    elif os.path.exists(node + '/_o/SUCCESS'):
         return 'done'
     else:
         return 'incomplete'
@@ -146,7 +146,7 @@ def node_status(node):
 def pretty_print_status(args):
     """Prints status of all nodes in a subtree
     """
-    command = ['tree', '--noreport', '-d', '-I', '_h|_m'] + [args.node]
+    command = ['tree', '--noreport', '-d', '-I', '_c|_o'] + [args.node]
     p = subprocess.Popen(command, stdout=subprocess.PIPE)
     maxlen = max((len(x.decode().rstrip()) for x in p.stdout))
 
@@ -170,7 +170,7 @@ def pretty_print_status(args):
 def print_tree(args):
     """Prints directory tree under a node.
     """
-    subprocess.check_call(['tree', '--noreport', '-d', '-I', '_h|_m'] + [args.node])
+    subprocess.check_call(['tree', '--noreport', '-d', '-I', '_c|_o'] + [args.node])
 
 
 def main():
@@ -184,7 +184,7 @@ def main():
     parser_run.add_argument('node')
     parser_run.set_defaults(func=run)
 
-    parser_drop = subparsers.add_parser('drop', help='drop machine directory')
+    parser_drop = subparsers.add_parser('drop', help='drop output directory')
     parser_drop.add_argument('-r', '--recursive', action='store_true')
     parser_drop.add_argument('-f', '--force', action='store_true')
     parser_drop.add_argument('node')
@@ -201,7 +201,7 @@ def main():
     parser_commit.add_argument('node')
     parser_commit.set_defaults(func=commit)
 
-    parser_get = subparsers.add_parser('get', help='get machine directory contents from origin repository')
+    parser_get = subparsers.add_parser('get', help='get output directory contents from origin repository')
     parser_get.add_argument('-r', '--recursive', action='store_true')
     parser_get.add_argument('node')
     parser_get.set_defaults(func=get)

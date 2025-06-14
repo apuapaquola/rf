@@ -15,6 +15,10 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Usage:
+    python -m unittest test.py
+
 """
 
 import unittest
@@ -36,15 +40,15 @@ class UnitTests(unittest.TestCase):
         """Creates dummy analysis tree and inits the git repo. It cds to 'dummy' """
         with open("dummy.tar.gz", "wb") as f:
             f.write(base64.b64decode(
-                b'H4sIAAAAAAAAA+2Z22qDQBRFfe5XTOl7nEvGeSs0Tb+jeIP0IRdihPbvO2MCkZPQRqpHSfdCIo6C' +
-                b'A/tc9jFFvV5/xdGgSI+zNpyVs7K5VvN5cz4RKe2MNVom4TmlZJJEwg67rSN1dUj3QkTprk5/fq7c' +
-                b'Vxwb4qVo9N9si/JlsCi4XX81l9rfV1pJBf05aOv/vhomBG7S38jE2cSHQMh/baWF/hwQ/ff1pv93' +
-                b'/Kq/s6f89+tSe/2NVi4Ssv+tXPLP9X96jLOPTVytHsp8tRWpEs+iUrPD5+G0oMOCbi2YsGCahbE3' +
-                b'D/7MOf/fptX/Uf9ZaOs/pf6v4P9YIPoX5a7/GLg5/7XzQWCa/p9o6M/BFf3DxbLPdzT6O9dBf+ef' +
-                b'j4SezeLjEba06H9jAejf1n90/+8tQJP/RsL/c0D8f0n9f0n9fwn/f0+c838xLf+P/s9CW//w+zpA' +
-                b'FHTX3/gOAP05uNS//ymw+/znQwH//7BwVf+eXWAX/xcGP39TW3z/ZYH4v5z6v5z6vxz+755o5/+U' +
-                b'vv9J1H8WiP6jz//KqWb+1wnqPwek/me0/me0/meo//cE9X/Lqcx/BvWfg0v9JzL/OejPwVX9R5z/' +
-                b'/HGc/xT6Pwek/xe0/xe0/xfo/wAAAAAAAAAAAAAAAAAAAAAAAAAAAEyFb6LrQrMAUAAA'))
+                b'H4sIAAAAAAAAA+2Zy2rDMBBFve5XuHQfS6NI2hWapt9R/IJ0kQd5QPv3leyWmEloYmrLbnoPJkpk' +
+                b'gwVHmhkpxWG5/EiiXhEOq7VvpdWi2X4TSbJKKxLGPyddY6NY9zusmsNun27jOEo3h/Sn5y7d/6MU' +
+                b'lf/VuiifepsFV/nXgpQU0hjj/EtjNfyHoOn/Ne9nClzlXwnn3Ggl/fonshL+Q8D8bw+r7t9x0b9b' +
+                b'7HX8dzcEOf/ui4pi0f1QTvnn/h/uk+xtlewWd2W+WMepjB/jnZzs3/dfHeQ7qNGhfIeqOoYePPg1' +
+                b'x/X/Mqb8bwXifxCa/keV/1H/BYH5L8pN93Pg6v0fWTcJVJX/pwb+Q3DGv/8x7/IdlX9rW/h3WcDV' +
+                b'fzSZJPXlhzTrfmAe+G/6H7z+V3JarX/XoP4PAKv/S17/l7z+L1H/3xLH9T8bU/1vLPJ/EJr+/edz' +
+                b'D7OgvX+yBP9BOPXf/S6w/f5PKSL4D8FZ/x1XgW3qPzL+/Hcqpjj/DQKr/3Je/+W8/stR/90SfP3P' +
+                b'x5L/8f9/EE79jyT/K/gPwVn/A+Z/d1X5X2nk/xCw/F/w/F/w/F8g/98SzfU/qv//sP8LAvM/+Pm/' +
+                b'tLI+/yfE/xCw+J/x+J/x+J8h/gMAAAAAAAAAAAAAAAAAAAAAAAAAADAWPgEUSJmxAFAAAA=='))
 
         subprocess.check_call(['tar', 'xfz', 'dummy.tar.gz'])
         os.chdir('dummy')
@@ -65,7 +69,7 @@ class UnitTests(unittest.TestCase):
 
                 command = '''export LC_ALL=C; find . -name '*.txt' | sort | md5sum'''
                 o = subprocess.check_output(command, shell=True).decode()
-                self.assertTrue(o.startswith('2be88994681ecef36d02636683a6bc9e'))
+                self.assertTrue(o.startswith('873a9c2d4a56e62c7afd955057e54ac1'))
 
                 command = '''export LC_ALL=C; cat `find . -name '*.txt'` | sort | md5sum'''
                 o = subprocess.check_output(command, shell=True).decode()

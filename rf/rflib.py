@@ -29,18 +29,18 @@ def is_ready_to_run(node):
     Args:
         node: a directory (node)
     Returns:
-        bool: True if the node is ready to run, i.e., if it has no _m/ dir and if there is an
-         executable driver script at _h/ and there is no 'yield' file in _h
+        bool: True if the node is ready to run, i.e., if it has no _o/ dir and if there is an
+         executable driver script at _c/ and there is no 'yield' file in _c
     """
     return node is not None\
-        and os.path.isdir(node + '/_h')\
-        and not os.path.exists(node + '/_m')\
-        and not os.path.exists(node + '/_h/yield')\
-        and os.access(node + '/_h/run', os.X_OK)
+        and os.path.isdir(node + '/_c')\
+        and not os.path.exists(node + '/_o')\
+        and not os.path.exists(node + '/_c/yield')\
+        and os.access(node + '/_c/run', os.X_OK)
 
 
 def find_dependencies(node, recursive):
-    """Finds the human directories _h/ in a subtree, and dependencies.
+    """Finds the code directories _c/ in a subtree, and dependencies.
 
     Args:
         node (str): a node at the root of the tree.
@@ -68,7 +68,7 @@ def find_dependencies(node, recursive):
         if recursive:
             queue.extend(((child, xx) for xx in filter(os.path.isdir,
                                                        (os.path.join(child, x) for x in os.listdir(child) if
-                                                        x not in ['_h', '_m']))))
+                                                        x not in ['_c', '_o']))))
 
             
 
@@ -77,8 +77,8 @@ def driver_script_command(node):
     to be included in the makefile.
     """
     
-    assert (os.path.isdir(node) and os.path.isdir(node + '/_h') and os.access(node + '/_h/run', os.X_OK))
-    return '''../_h/run > nohup.out 2>&1'''
+    assert (os.path.isdir(node) and os.path.isdir(node + '/_c') and os.access(node + '/_c/run', os.X_OK))
+    return '''../_c/run > nohup.out 2>&1'''
 
     
 def get_basedir():
@@ -87,7 +87,7 @@ def get_basedir():
 
 
 def success_file(node):
-    return node + '/_m/SUCCESS'
+    return node + '/_o/SUCCESS'
 
 
 def rule_string(dependencies, node):
@@ -109,8 +109,8 @@ def rule_string(dependencies, node):
 %s: %s
 \tset -o errexit -o pipefail
 \techo -n "Start %s: "; date --rfc-3339=seconds
-\tmkdir %s/_m
-\tcd %s/_m
+\tmkdir %s/_o
+\tcd %s/_o
 \t%s
 \ttouch SUCCESS
 \techo -n "End %s: "; date --rfc-3339=seconds
@@ -129,7 +129,7 @@ def dependency_links(node):
 
     """
 
-    dep_dir = node + '/_h/dep'
+    dep_dir = node + '/_c/dep'
     if os.path.isdir(dep_dir):
         for x in os.listdir(dep_dir):
             if os.path.islink(dep_dir + '/' + x) and os.path.isdir(dep_dir + '/' + x):
@@ -154,7 +154,7 @@ def makefile(dependency_iter):
     """Generates a makefile given a list of tuples specifying nodes and dependencies.
 
     Args:
-        dependency_iter (iterable on list of tuples): output of find_human_dirs
+        dependency_iter (iterable on list of tuples): output of find_dependencies
 
     Returns:
         str: a makefile
