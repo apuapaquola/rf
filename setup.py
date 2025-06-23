@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rf',
-    version='0.3.0',
+    version='0.3.1',
     description='A minimalist framework for reproducible computation',
     long_description='A git-based framework enabling workflow, sharing and reproducibility for computational analyses',
     author='Apuã Paquola',

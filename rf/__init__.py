@@ -109,6 +109,32 @@ def commit(args):
         raise
 
 
+def commit_code(args):
+    """
+    Commit ONLY the `_c` (code) directories under the requested node(s).
+
+    Usage pattern mirrors `commit`, but skips git-annex entirely.
+    """
+    if args.recursive:
+        nl = list(nodes(args.node))
+    else:
+        nl = [args.node]
+
+    code_dirs = [
+        y for y in (os.path.join(x, '_c') for x in nl) if os.path.isdir(y)
+    ]
+
+    if not code_dirs:
+        print("No _c directories found to commit.", file=sys.stderr)
+        return
+
+    try:
+        subprocess.check_call(['git', 'add'] + code_dirs)
+        subprocess.check_call(['git', 'commit', '-m', args.message] + code_dirs)
+    except subprocess.CalledProcessError:
+        raise
+
+
 def get(args):
     """Fetches contents of output directories from origin repository
     :param args:
@@ -200,6 +226,13 @@ def main():
     parser_commit.add_argument('-m', '--message', required=True)
     parser_commit.add_argument('node')
     parser_commit.set_defaults(func=commit)
+
+    parser_commit_code = subparsers.add_parser('commit-code', aliases=['cc'], help='Stage and commit only the _c (code) directories.')
+    parser_commit_code.add_argument('node', help='Path to the node whose _c dir you want to commit.')
+    parser_commit_code.add_argument('-r', '--recursive', action='store_true', help='Recurse into all descendant nodes.')
+    parser_commit_code.add_argument('-m', '--message', required=True, help='Commit message.')
+    parser_commit_code.set_defaults(func=commit_code)
+
 
     parser_get = subparsers.add_parser('get', help='get output directory contents from origin repository')
     parser_get.add_argument('-r', '--recursive', action='store_true')
