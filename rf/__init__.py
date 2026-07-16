@@ -22,6 +22,7 @@ import os
 import shutil
 import subprocess
 import re
+import sys
 
 from . import rflib
 
