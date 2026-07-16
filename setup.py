@@ -10,7 +10,7 @@ setup(
     url='https://github.com/apuapaquola/rf',
     license='GPLv3',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha'
+        'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3',
         'Intended Audience :: Developers',
