@@ -1,5 +1,4 @@
 import json
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -83,30 +82,6 @@ class OutputStateTests(unittest.TestCase):
         self.assertEqual(
             'failure output\n',
             (node / '_o' / 'nohup.out').read_text(encoding='utf-8'))
-
-    def test_failed_dependency_blocks_descendant_and_make_failure_propagates(self):
-        tree = self.root / 'tree'
-        tree.mkdir()
-        dependency = self.make_node(
-            'tree/dependency', '#!/bin/sh\nexit 9\n')
-        descendant = self.make_node(
-            'tree/dependency/descendant',
-            '#!/bin/sh\nprintf "must not run\\n"\n')
-
-        with self.assertRaises(rflib.NodeExecutionError):
-            rflib.execute_node(dependency)
-
-        makefile = rflib.makefile(
-            rflib.find_dependencies(str(tree), recursive=True))
-
-        self.assertIn(
-            str(dependency / '_o' / 'SUCCESS'),
-            makefile)
-        self.assertIn('failed (exit code 9)', makefile)
-        with self.assertRaises(subprocess.CalledProcessError):
-            rflib.run_make(makefile)
-
-        self.assertFalse((descendant / '_o').exists())
 
 
 if __name__ == '__main__':

@@ -1,0 +1,4 @@
+#!/bin/sh
+echo e1 > s1.txt
+echo e2 > s2.txt
+echo e3 > s3.txt
