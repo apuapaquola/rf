@@ -5,7 +5,7 @@ import unittest
 from argparse import Namespace
 from pathlib import Path
 
-from rf import rflib
+from rf import executor, state, workflow
 
 
 FIXTURE_ROOT = Path(__file__).parent / 'fixtures' / 'analysis_tree'
@@ -38,7 +38,7 @@ class WorkflowIntegrationTests(unittest.TestCase):
         tree = self.root / 'analysis_tree'
         shutil.copytree(FIXTURE_ROOT, tree, symlinks=True)
 
-        rflib.run(Namespace(
+        executor.run(Namespace(
             node=str(tree),
             recursive=True,
             verbose=False,
@@ -64,13 +64,13 @@ class WorkflowIntegrationTests(unittest.TestCase):
         for node in [
                 'nodeA', 'nodeB', 'nodeB/nodeC', 'nodeB/nodeD', 'nodeE']:
             self.assertEqual(
-                rflib.OutputState.SUCCESS,
-                rflib.output_state(tree / node),
+                state.OutputState.SUCCESS,
+                state.output_state(tree / node),
             )
 
         self.assertEqual(
             [str((tree / 'nodeB' / 'nodeD').resolve())],
-            list(rflib.dependency_links(str(tree / 'nodeE'))),
+            list(workflow.dependency_links(str(tree / 'nodeE'))),
         )
 
     def test_failed_dependency_blocks_descendant_and_propagates_failure(self):
@@ -82,16 +82,16 @@ class WorkflowIntegrationTests(unittest.TestCase):
             'failure_tree/dependency/descendant',
             '#!/bin/sh\nprintf "must not run\\n"\n')
 
-        with self.assertRaises(rflib.NodeExecutionError):
-            rflib.execute_node(dependency)
+        with self.assertRaises(executor.NodeExecutionError):
+            executor.execute_node(dependency)
 
-        makefile = rflib.makefile(
-            rflib.find_dependencies(str(tree), recursive=True))
+        makefile = executor.makefile(
+            workflow.find_dependencies(str(tree), recursive=True))
 
         self.assertIn(str(dependency / '_o' / 'SUCCESS'), makefile)
         self.assertIn('failed (exit code 9)', makefile)
         with self.assertRaises(subprocess.CalledProcessError):
-            rflib.run_make(makefile)
+            executor.run_make(makefile)
 
         self.assertFalse((descendant / '_o').exists())
 

@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from rf import rflib
+from rf import executor, state
 
 
 class OutputStateTests(unittest.TestCase):
@@ -25,14 +25,14 @@ class OutputStateTests(unittest.TestCase):
     def test_output_state_recognizes_absent_incomplete_and_legacy_success(self):
         node = self.make_node('node', '#!/bin/sh\nexit 0\n')
 
-        self.assertEqual(rflib.OutputState.ABSENT, rflib.output_state(node))
+        self.assertEqual(state.OutputState.ABSENT, state.output_state(node))
 
         output = node / '_o'
         output.mkdir()
-        self.assertEqual(rflib.OutputState.INCOMPLETE, rflib.output_state(node))
+        self.assertEqual(state.OutputState.INCOMPLETE, state.output_state(node))
 
         (output / 'SUCCESS').touch()
-        self.assertEqual(rflib.OutputState.SUCCESS, rflib.output_state(node))
+        self.assertEqual(state.OutputState.SUCCESS, state.output_state(node))
 
     def test_conflicting_markers_are_invalid(self):
         node = self.make_node('node', '#!/bin/sh\nexit 0\n')
@@ -41,15 +41,15 @@ class OutputStateTests(unittest.TestCase):
         (output / 'SUCCESS').touch()
         (output / 'FAILURE').touch()
 
-        self.assertEqual(rflib.OutputState.INVALID, rflib.output_state(node))
+        self.assertEqual(state.OutputState.INVALID, state.output_state(node))
 
     def test_successful_execution_records_metadata_and_output(self):
         node = self.make_node(
             'node', '#!/bin/sh\nprintf "driver output\\n"\n')
 
-        rflib.execute_node(node)
+        executor.execute_node(node)
 
-        self.assertEqual(rflib.OutputState.SUCCESS, rflib.output_state(node))
+        self.assertEqual(state.OutputState.SUCCESS, state.output_state(node))
         self.assertFalse((node / '_o' / 'RUNNING').exists())
         self.assertFalse((node / '_o' / 'FAILURE').exists())
         self.assertEqual(
@@ -68,11 +68,11 @@ class OutputStateTests(unittest.TestCase):
         node = self.make_node(
             'node', '#!/bin/sh\nprintf "failure output\\n"\nexit 7\n')
 
-        with self.assertRaises(rflib.NodeExecutionError) as raised:
-            rflib.execute_node(node)
+        with self.assertRaises(executor.NodeExecutionError) as raised:
+            executor.execute_node(node)
 
         self.assertEqual(7, raised.exception.returncode)
-        self.assertEqual(rflib.OutputState.FAILURE, rflib.output_state(node))
+        self.assertEqual(state.OutputState.FAILURE, state.output_state(node))
         self.assertFalse((node / '_o' / 'RUNNING').exists())
         self.assertFalse((node / '_o' / 'SUCCESS').exists())
 

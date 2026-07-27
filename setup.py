@@ -22,7 +22,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'rf=rf:main',
+            'rf=rf.cli:main',
             ]
     }
 )
