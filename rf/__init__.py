@@ -153,21 +153,26 @@ def get(args):
 
 
 def node_status(node):
-    """Returns node status"""
+    """Return the structural and output state of a node."""
     if not os.path.isdir(node + '/_c'):
         return 'no _c'
-    elif os.path.exists(node + '/_c/run') and os.path.exists(node + '/_c/yield'):
+    if os.path.exists(node + '/_c/run') and os.path.exists(node + '/_c/yield'):
         return 'run/yield'
-    elif os.path.exists(node + '/_c/yield'):
+    if os.path.exists(node + '/_c/yield'):
         return 'yield'
-    elif not (os.path.exists(node + '/_c/run') and os.access(node + '/_c/run', os.X_OK)):
+    if not (os.path.exists(node + '/_c/run') and
+            os.access(node + '/_c/run', os.X_OK)):
         return 'no run script'
-    elif not os.path.isdir(node + '/_o'):
-        return 'ready to run'
-    elif os.path.exists(node + '/_o/SUCCESS'):
-        return 'done'
-    else:
-        return 'incomplete'
+
+    state_labels = {
+        rflib.OutputState.ABSENT: 'ready to run',
+        rflib.OutputState.RUNNING: 'running',
+        rflib.OutputState.SUCCESS: 'done',
+        rflib.OutputState.FAILURE: 'failed',
+        rflib.OutputState.INCOMPLETE: 'incomplete',
+        rflib.OutputState.INVALID: 'invalid',
+    }
+    return state_labels[rflib.output_state(node)]
 
 
 def pretty_print_status(args):

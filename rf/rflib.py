@@ -17,10 +17,159 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import argparse
+import json
 import os
+import shlex
+import socket
 import subprocess
+import sys
+import tempfile
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+from pathlib import Path
 
 __author__ = 'Apuã Paquola'
+
+
+class OutputState(Enum):
+    """The state represented by a node's output directory."""
+
+    ABSENT = 'absent'
+    RUNNING = 'running'
+    SUCCESS = 'success'
+    FAILURE = 'failure'
+    INCOMPLETE = 'incomplete'
+    INVALID = 'invalid'
+
+
+class NodeExecutionError(RuntimeError):
+    """Raised when a node's driver script does not complete successfully."""
+
+    def __init__(self, node, returncode, message=None):
+        self.node = os.fspath(node)
+        self.returncode = returncode
+        if message is None:
+            message = 'Node %s failed with exit code %s' % (self.node, returncode)
+        super().__init__(message)
+
+
+_MARKERS = {
+    OutputState.RUNNING: 'RUNNING',
+    OutputState.SUCCESS: 'SUCCESS',
+    OutputState.FAILURE: 'FAILURE',
+}
+
+
+def output_state(node):
+    """Return the state represented by a node's ``_o`` directory."""
+    output = Path(node) / '_o'
+    if not output.exists():
+        return OutputState.ABSENT
+    if not output.is_dir():
+        return OutputState.INVALID
+
+    states = [
+        state for state, marker in _MARKERS.items()
+        if (output / marker).exists()
+    ]
+    if len(states) > 1:
+        return OutputState.INVALID
+    if not states:
+        return OutputState.INCOMPLETE
+    return states[0]
+
+
+def _utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _write_json_atomic(path, data):
+    """Write JSON to path without exposing a partially-written marker."""
+    path = Path(path)
+    temporary_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+                mode='w', encoding='utf-8', dir=path.parent,
+                prefix='.rf-state-', delete=False) as temporary:
+            temporary_name = temporary.name
+            json.dump(data, temporary, sort_keys=True)
+            temporary.write('\n')
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_name, path)
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            try:
+                os.unlink(temporary_name)
+            except FileNotFoundError:
+                pass
+
+
+def _finish_execution(output, marker, record, **updates):
+    """Atomically replace RUNNING with the final state marker."""
+    record.update(updates)
+    running = output / _MARKERS[OutputState.RUNNING]
+    _write_json_atomic(running, record)
+    os.replace(running, output / marker)
+
+
+def execute_node(node):
+    """Run one node and record RUNNING, SUCCESS, or FAILURE in ``_o``."""
+    node = Path(node).resolve()
+    driver = node / '_c' / 'run'
+    output = node / '_o'
+
+    if not driver.is_file() or not os.access(driver, os.X_OK):
+        raise NodeExecutionError(
+            node, None, 'Node %s has no executable _c/run script' % node)
+    if output.exists():
+        raise NodeExecutionError(
+            node, None, 'Node %s cannot run while _o exists (%s)' %
+            (node, output_state(node).value))
+
+    output.mkdir()
+    record = {
+        'schema_version': 1,
+        'run_id': str(uuid.uuid4()),
+        'started_at': _utc_now(),
+        'hostname': socket.gethostname(),
+        'pid': os.getpid(),
+    }
+    _write_json_atomic(output / _MARKERS[OutputState.RUNNING], record)
+
+    try:
+        with (output / 'nohup.out').open('wb') as log:
+            result = subprocess.run(
+                [str(driver)], cwd=output, stdout=log,
+                stderr=subprocess.STDOUT, check=False)
+    except BaseException as error:
+        _finish_execution(
+            output, _MARKERS[OutputState.FAILURE], record,
+            finished_at=_utc_now(),
+            exit_code=130 if isinstance(error, KeyboardInterrupt) else None,
+            error='%s: %s' % (type(error).__name__, error))
+        raise
+
+    if result.returncode != 0:
+        _finish_execution(
+            output, _MARKERS[OutputState.FAILURE], record,
+            finished_at=_utc_now(), exit_code=result.returncode)
+        raise NodeExecutionError(node, result.returncode)
+
+    _finish_execution(
+        output, _MARKERS[OutputState.SUCCESS], record,
+        finished_at=_utc_now(), exit_code=0)
+
+
+def is_computational_node(node):
+    """Return whether node defines a driver that participates in the graph."""
+    return node is not None\
+        and os.path.isdir(node + '/_c')\
+        and not os.path.exists(node + '/_c/yield')\
+        and os.access(node + '/_c/run', os.X_OK)
 
 
 def is_ready_to_run(node):
@@ -32,11 +181,8 @@ def is_ready_to_run(node):
         bool: True if the node is ready to run, i.e., if it has no _o/ dir and if there is an
          executable driver script at _c/ and there is no 'yield' file in _c
     """
-    return node is not None\
-        and os.path.isdir(node + '/_c')\
-        and not os.path.exists(node + '/_o')\
-        and not os.path.exists(node + '/_c/yield')\
-        and os.access(node + '/_c/run', os.X_OK)
+    return is_computational_node(node)\
+        and output_state(node) == OutputState.ABSENT
 
 
 def find_dependencies(node, recursive):
@@ -47,8 +193,9 @@ def find_dependencies(node, recursive):
         recursive (bool): whether to look at the entire tree recursively.
 
     Yields:
-        (list, str): a tuple that contains a list of dependencies and a node, for each node
-         of the tree that is ready to run.
+        (list, str): a tuple containing a node's dependencies and the node.
+        Nodes in terminal or blocked states are included so make can report
+        their state and block descendants.
 
     """
     assert os.path.isdir(node)
@@ -57,12 +204,15 @@ def find_dependencies(node, recursive):
         (parent, child) = queue.pop(0)
 
         l = list(dependency_links(child))
-        dependencies = [x for x in [parent] + l
-                        if x is not None and
-                        is_ready_to_run(os.path.realpath(x)) and
-                        belongs_to_tree(x, node)]
+        dependencies = [
+            x for x in [parent] + l
+            if x is not None
+            and belongs_to_tree(x, node)
+            and is_computational_node(os.path.realpath(x))
+        ]
 
-        if is_ready_to_run(os.path.realpath(child)) and belongs_to_tree(child, node):
+        if (is_computational_node(os.path.realpath(child))
+                and belongs_to_tree(child, node)):
             yield (dependencies, child)
 
         if recursive:
@@ -76,9 +226,10 @@ def driver_script_command(node):
     """Generate a command to call the driver script. This command is
     to be included in the makefile.
     """
-    
+
     assert (os.path.isdir(node) and os.path.isdir(node + '/_c') and os.access(node + '/_c/run', os.X_OK))
-    return '''../_c/run > nohup.out 2>&1'''
+    return ' '.join(shlex.quote(part) for part in
+                    [sys.executable, os.path.abspath(__file__), node])
 
     
 def get_basedir():
@@ -109,13 +260,43 @@ def rule_string(dependencies, node):
 %s: %s
 \tset -o errexit -o pipefail
 \techo -n "Start %s: "; date --rfc-3339=seconds
-\tmkdir %s/_o
-\tcd %s/_o
 \t%s
-\ttouch SUCCESS
 \techo -n "End %s: "; date --rfc-3339=seconds
 
-''' % (success_file(node), dep_string, node, node, node, command, node)
+''' % (success_file(node), dep_string, node, command, node)
+
+
+def _failure_exit_code(node):
+    """Read an exit code from a FAILURE marker when one is available."""
+    try:
+        with open(os.path.join(node, '_o', 'FAILURE'), encoding='utf-8') as marker:
+            return json.load(marker).get('exit_code')
+    except (OSError, ValueError, AttributeError):
+        return None
+
+
+def blocked_rule_string(node):
+    """Generate a failing make rule that explains why a node is blocked."""
+    state = output_state(os.path.realpath(node))
+    detail = {
+        OutputState.RUNNING: 'running',
+        OutputState.FAILURE: 'failed',
+        OutputState.INCOMPLETE: 'incomplete',
+        OutputState.INVALID: 'invalid',
+    }[state]
+    if state == OutputState.FAILURE:
+        exit_code = _failure_exit_code(node)
+        if exit_code is not None:
+            detail += ' (exit code %s)' % exit_code
+
+    message = 'Node %s is %s; preserve or remove _o before retrying' % (
+        node, detail)
+    return """.ONESHELL:
+%s:
+\tprintf 'Blocked: %%s\\n' %s >&2
+\texit 1
+
+""" % (success_file(node), shlex.quote(message))
 
 
 def dependency_links(node):
@@ -165,7 +346,11 @@ def makefile(dependency_iter):
 
     makefile_string = ''
     for (dependencies, child) in dependency_iter:
-        makefile_string += rule_string(dependencies, child)
+        state = output_state(os.path.realpath(child))
+        if state == OutputState.ABSENT:
+            makefile_string += rule_string(dependencies, child)
+        elif state != OutputState.SUCCESS:
+            makefile_string += blocked_rule_string(child)
 
         for p in dependencies:
             dependency_set.add(p)
@@ -173,9 +358,14 @@ def makefile(dependency_iter):
         child_set.add(child)
 
     for node in dependency_set.difference(child_set):
-        makefile_string += rule_string([], node)
+        state = output_state(os.path.realpath(node))
+        if state == OutputState.ABSENT:
+            makefile_string += rule_string([], node)
+        elif state != OutputState.SUCCESS:
+            makefile_string += blocked_rule_string(node)
 
-    makefile_string = 'all: ' + ' '.join(map(success_file, dependency_set.union(child_set))) + \
+    makefile_string = 'SHELL := /bin/bash\n\nall: ' + \
+                      ' '.join(map(success_file, dependency_set.union(child_set))) + \
                       '\n\n' + makefile_string
 
     return makefile_string
@@ -186,11 +376,11 @@ def run_make(makefile_string):
     :param makefile_string:
     :return:
     """
-    p = subprocess.Popen(['make', '--keep-going', '--silent', '-f', '-'], stdin=subprocess.PIPE)
-
-    p.stdin.write(makefile_string.encode())
-    p.stdin.close()
-    p.wait()
+    subprocess.run(
+        ['make', '--keep-going', '--silent', '-f', '-'],
+        input=makefile_string.encode(),
+        check=True,
+    )
 
 
 def run(args):
@@ -202,3 +392,20 @@ def run(args):
         print(mf)
     if not args.dry_run:
         run_make(mf)
+
+
+def main():
+    """Internal entry point used by generated makefile recipes."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('node')
+    args = parser.parse_args()
+    try:
+        execute_node(args.node)
+    except NodeExecutionError as error:
+        print(error, file=sys.stderr)
+        return error.returncode if error.returncode is not None else 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

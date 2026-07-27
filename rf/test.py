@@ -27,7 +27,10 @@ import os
 import base64
 import subprocess
 from argparse import Namespace
-import rflib
+try:
+    from . import rflib
+except ImportError:
+    import rflib
 
 
 __author__ = 'Apuã Paquola'

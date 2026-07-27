@@ -36,7 +36,7 @@ Each node has two special subdirectories: `_c` and `_o` with distinct purposes. 
 
 This is principle 2: separation of user-generated data from program-generated data.
 
-In the "code" directory we put a file named `run`. `run` is a script that is supposed to be run without arguments from the "code" directory. This script is responsible to call the necessary programs that will do the computation in the analysis step and generate the contents of `_o`.
+In the "code" directory we put a file named `run`. `run` is an executable script that is called without arguments with `_o` as its working directory. This script is responsible for calling the programs that perform the computation and generate the contents of `_o`.
 
 This is principle 3: use of driver scripts. [doi: 10.1371/journal.pcbi.1000424]
 
@@ -49,6 +49,23 @@ Separation of computer-generated data from human-generated data is also nice. It
 
 Running driver scripts without arguments is a way to make sure computation doesn't depend on manually specified parameters, which are easy to forget.
 
+## Execution states
+
+The contents of `_o` record the execution state of a node:
+
+* no `_o` directory: ready to run;
+* `RUNNING`: execution is in progress;
+* `SUCCESS`: execution completed successfully;
+* `FAILURE`: the driver exited unsuccessfully;
+* `_o` without a state marker: execution was interrupted or predates state tracking.
+
+State markers written by rf contain JSON metadata, including timestamps, a run ID,
+and the driver's exit code. Existing empty `SUCCESS` markers remain supported.
+Conflicting state markers are treated as invalid.
+
+Failed, interrupted, running, and invalid nodes block their descendants. rf does
+not overwrite or delete their output automatically; preserve or remove `_o`
+explicitly before retrying.
 
 
 ## Version control
