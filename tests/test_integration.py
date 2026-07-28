@@ -37,6 +37,12 @@ class WorkflowIntegrationTests(unittest.TestCase):
     def test_recursive_workflow_generates_expected_outputs(self):
         tree = self.root / 'analysis_tree'
         shutil.copytree(FIXTURE_ROOT, tree, symlinks=True)
+        dependency_link = tree / 'nodeE' / '_c' / 'dep' / 'nodeD'
+        dependency_link.parent.mkdir(parents=True)
+        dependency_link.symlink_to(
+            '../../../nodeB/nodeD',
+            target_is_directory=True,
+        )
 
         executor.run(Namespace(
             node=str(tree),

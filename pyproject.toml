@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rf"
+version = "0.4.0"
+description = "A minimalist framework for reproducible computation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["COPYING"]
+authors = [
+  { name = "Apuã Paquola", email = "apuapaquola@gmail.com" },
+]
+keywords = [
+  "bioinformatics",
+  "reproducibility",
+  "collaboration",
+  "workflow",
+  "git",
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/apuapaquola/rf"
+Repository = "https://github.com/apuapaquola/rf"
+
+[project.scripts]
+rf = "rf.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rf"]
+exclude = ["tests*"]
