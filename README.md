@@ -1,8 +1,6 @@
-# rf
+# rf - A minimalist framework for reproducible computation.
 
-**A minimalist framework for reproducible computation.**
-
-RF is a filesystem-based organizational framework, not a workflow language. It
+RF is a filesystem-based organizational framework for computational analyses. It
 defines a small contract for arranging directories, files, dependencies, and
 executable scripts so that a computational analysis is easier to understand,
 reproduce, and share.
@@ -49,8 +47,8 @@ introducing a separate configuration language.
 
 ### 2. `_c` and `_o` separate instructions from results
 
-`_c` contains the human-created material needed to understand and reproduce a
-step:
+`_c` contains the material (whether human-authored or AI-generated) needed to
+understand and reproduce a step:
 
 - executable code;
 - parameters and configuration;
@@ -78,7 +76,7 @@ RF invokes this script:
 - only after its dependencies have completed successfully.
 
 The script may use any language or computational tool. Its job is to perform one
-reproducible step and write its results into `_o`.
+step in the analysis workflow and write its results into `_o`.
 
 Parameters that affect the result should be recorded in `_c`, rather than
 supplied manually when the script is launched.
